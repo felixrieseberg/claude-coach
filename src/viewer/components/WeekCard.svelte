@@ -13,6 +13,7 @@
     filterWorkout: (workout: Workout) => boolean;
     onWorkoutClick: (workout: Workout, day: TrainingDay) => void;
     onDrop: (workoutId: string, newDate: string) => void;
+    onAddWorkout: (day: TrainingDay) => void;
     animationDelay: number;
   }
 
@@ -25,6 +26,7 @@
     filterWorkout,
     onWorkoutClick,
     onDrop,
+    onAddWorkout,
     animationDelay,
   }: Props = $props();
 
@@ -94,6 +96,12 @@
         {:else if day.workouts.length === 0}
           <div class="empty-day">Rest</div>
         {/if}
+
+        <button class="add-workout-btn" onclick={() => onAddWorkout(day)} title="Add workout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
       </div>
     {/each}
   </div>
@@ -246,6 +254,35 @@
     color: var(--text-muted);
     font-size: 0.8rem;
     font-style: italic;
+  }
+
+  .add-workout-btn {
+    margin-top: auto;
+    padding: 0.5rem;
+    border: 1px dashed var(--border-medium);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    opacity: 0;
+  }
+
+  .day-column:hover .add-workout-btn {
+    opacity: 1;
+  }
+
+  .add-workout-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .add-workout-btn svg {
+    width: 16px;
+    height: 16px;
   }
 
   @media (max-width: 1200px) {

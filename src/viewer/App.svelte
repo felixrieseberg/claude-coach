@@ -21,7 +21,14 @@
   let filters = $state({ sport: "all", status: "all" });
   let sidebarOpen = $state(false);
   let settingsOpen = $state(false);
-  let selectedWorkout = $state<{ workout: Workout; day: TrainingDay } | null>(null);
+
+  // Workout modal state
+  type ModalState =
+    | { mode: "view"; workout: Workout; day: TrainingDay }
+    | { mode: "create"; day: TrainingDay }
+    | null;
+
+  let modalState = $state<ModalState>(null);
 
   // Apply theme to document
   $effect(() => {
@@ -55,7 +62,15 @@
   }
 
   function handleWorkoutClick(workout: Workout, day: TrainingDay) {
-    selectedWorkout = { workout, day };
+    modalState = { mode: "view", workout, day };
+  }
+
+  function handleAddWorkout(day: TrainingDay) {
+    modalState = { mode: "create", day };
+  }
+
+  function handleCloseModal() {
+    modalState = null;
   }
 
   // Change handlers
@@ -70,32 +85,68 @@
     saveChanges(changes);
   }
 
-  function handleWorkoutEdit(workoutId: string, edits: Partial<Workout>) {
-    changes.edited[workoutId] = { ...(changes.edited[workoutId] || {}), ...edits };
-    changes = { ...changes };
-    saveChanges(changes);
-  }
+  function handleWorkoutSave(updates: Partial<Workout>) {
+    if (!modalState) return;
 
-  function handleWorkoutDelete(workoutId: string) {
-    if (!changes.deleted.includes(workoutId)) {
-      changes.deleted = [...changes.deleted, workoutId];
+    if (modalState.mode === "create") {
+      // Create new workout
+      const id = generateWorkoutId();
+      const fullWorkout: Workout = {
+        id,
+        sport: updates.sport || "run",
+        type: updates.type || "endurance",
+        name: updates.name || "Workout",
+        description: updates.description || "",
+        durationMinutes: updates.durationMinutes,
+        distanceMeters: updates.distanceMeters,
+        primaryZone: updates.primaryZone,
+        humanReadable: updates.humanReadable,
+        completed: false,
+      };
+      changes.added[id] = { date: modalState.day.date, workout: fullWorkout };
       changes = { ...changes };
       saveChanges(changes);
+      modalState = null;
+    } else {
+      // Edit existing workout
+      const workoutId = modalState.workout.id;
+
+      // Check if it's a user-added workout
+      if (changes.added[workoutId]) {
+        // Update the added workout directly
+        changes.added[workoutId].workout = {
+          ...changes.added[workoutId].workout,
+          ...updates,
+        };
+      } else {
+        // Store edits as overlay
+        changes.edited[workoutId] = { ...(changes.edited[workoutId] || {}), ...updates };
+      }
+      changes = { ...changes };
+      saveChanges(changes);
+
+      // Update the modal state with the new workout data
+      modalState = {
+        ...modalState,
+        workout: { ...modalState.workout, ...updates },
+      };
     }
   }
 
-  function handleWorkoutRestore(workoutId: string) {
-    changes.deleted = changes.deleted.filter((id) => id !== workoutId);
+  function handleWorkoutDelete(workoutId: string) {
+    // Check if it's a user-added workout
+    if (changes.added[workoutId]) {
+      // Remove from added
+      delete changes.added[workoutId];
+    } else {
+      // Mark as deleted
+      if (!changes.deleted.includes(workoutId)) {
+        changes.deleted = [...changes.deleted, workoutId];
+      }
+    }
     changes = { ...changes };
     saveChanges(changes);
-  }
-
-  function handleWorkoutAdd(date: string, workout: Omit<Workout, "id">) {
-    const id = generateWorkoutId();
-    const fullWorkout: Workout = { ...workout, id } as Workout;
-    changes.added[id] = { date, workout: fullWorkout };
-    changes = { ...changes };
-    saveChanges(changes);
+    modalState = null;
   }
 </script>
 
@@ -124,17 +175,21 @@
       {changes}
       onWorkoutClick={handleWorkoutClick}
       onWorkoutMove={handleWorkoutMove}
+      onAddWorkout={handleAddWorkout}
     />
   </main>
 </div>
 
-{#if selectedWorkout}
+{#if modalState}
   <WorkoutModal
-    workout={selectedWorkout.workout}
-    day={selectedWorkout.day}
+    workout={modalState.mode === "view" ? modalState.workout : null}
+    day={modalState.day}
+    mode={modalState.mode}
     {settings}
-    onClose={() => (selectedWorkout = null)}
+    onClose={handleCloseModal}
     onToggleComplete={handleToggleComplete}
+    onSave={handleWorkoutSave}
+    onDelete={handleWorkoutDelete}
   />
 {/if}
 

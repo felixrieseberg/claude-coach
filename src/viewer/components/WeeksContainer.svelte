@@ -19,10 +19,19 @@
     changes: PlanChanges;
     onWorkoutClick: (workout: Workout, day: TrainingDay) => void;
     onWorkoutMove: (workoutId: string, originalDate: string, newDate: string) => void;
+    onAddWorkout: (day: TrainingDay) => void;
   }
 
-  let { plan, settings, filters, completed, changes, onWorkoutClick, onWorkoutMove }: Props =
-    $props();
+  let {
+    plan,
+    settings,
+    filters,
+    completed,
+    changes,
+    onWorkoutClick,
+    onWorkoutMove,
+    onAddWorkout,
+  }: Props = $props();
 
   const today = getTodayISO();
 
@@ -179,6 +188,7 @@
       {filterWorkout}
       {onWorkoutClick}
       onDrop={handleDrop}
+      {onAddWorkout}
       animationDelay={index * 0.05}
     />
   {/each}

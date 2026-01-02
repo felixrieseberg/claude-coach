@@ -1,20 +1,74 @@
 <script lang="ts">
-  import type { Workout, TrainingDay } from "../../schema/training-plan.js";
+  import type { Workout, TrainingDay, Sport, WorkoutType } from "../../schema/training-plan.js";
   import type { Settings } from "../stores/settings.js";
   import { formatDuration, formatDistance, formatDate, getZoneInfo } from "../lib/utils.js";
 
+  type Mode = "view" | "edit" | "create";
+
   interface Props {
-    workout: Workout;
+    workout: Workout | null; // null for create mode
     day: TrainingDay;
     settings: Settings;
+    mode?: Mode;
     onClose: () => void;
     onToggleComplete: (workoutId: string) => void;
+    onSave: (workout: Partial<Workout>) => void;
+    onDelete: (workoutId: string) => void;
   }
 
-  let { workout, day, settings, onClose, onToggleComplete }: Props = $props();
+  let {
+    workout,
+    day,
+    settings,
+    mode = "view",
+    onClose,
+    onToggleComplete,
+    onSave,
+    onDelete,
+  }: Props = $props();
+
+  let currentMode = $state<Mode>(mode);
+  let showDeleteConfirm = $state(false);
+
+  // Editable fields
+  let editSport = $state<Sport>(workout?.sport || "run");
+  let editType = $state<WorkoutType>(workout?.type || "endurance");
+  let editName = $state(workout?.name || "");
+  let editDescription = $state(workout?.description || "");
+  let editDuration = $state(workout?.durationMinutes?.toString() || "");
+  let editDistance = $state(workout?.distanceMeters?.toString() || "");
+  let editZone = $state(workout?.primaryZone || "");
+  let editStructure = $state(workout?.humanReadable || "");
+
+  const sports: Sport[] = ["swim", "bike", "run", "strength", "brick", "race", "rest"];
+  const workoutTypes: WorkoutType[] = [
+    "rest",
+    "recovery",
+    "endurance",
+    "tempo",
+    "threshold",
+    "intervals",
+    "vo2max",
+    "sprint",
+    "race",
+    "brick",
+    "technique",
+    "openwater",
+    "hills",
+    "long",
+  ];
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === "Escape") onClose();
+    if (e.key === "Escape") {
+      if (showDeleteConfirm) {
+        showDeleteConfirm = false;
+      } else if (currentMode !== "view") {
+        currentMode = workout ? "view" : "view"; // Go back to view or close
+        if (!workout) onClose();
+      } else {
+        onClose();
+      }
+    }
   }
 
   function handleBackdropClick(e: MouseEvent) {
@@ -22,6 +76,66 @@
       onClose();
     }
   }
+
+  function startEdit() {
+    editSport = workout?.sport || "run";
+    editType = workout?.type || "endurance";
+    editName = workout?.name || "";
+    editDescription = workout?.description || "";
+    editDuration = workout?.durationMinutes?.toString() || "";
+    editDistance = workout?.distanceMeters?.toString() || "";
+    editZone = workout?.primaryZone || "";
+    editStructure = workout?.humanReadable || "";
+    currentMode = "edit";
+  }
+
+  function cancelEdit() {
+    if (mode === "create") {
+      onClose();
+    } else {
+      currentMode = "view";
+    }
+  }
+
+  function handleSave() {
+    const updates: Partial<Workout> = {
+      sport: editSport,
+      type: editType,
+      name: editName,
+      description: editDescription,
+      durationMinutes: editDuration ? parseInt(editDuration) : undefined,
+      distanceMeters: editDistance ? parseInt(editDistance) : undefined,
+      primaryZone: editZone || undefined,
+      humanReadable: editStructure || undefined,
+    };
+    onSave(updates);
+    if (mode !== "create") {
+      currentMode = "view";
+    }
+  }
+
+  function handleDelete() {
+    if (workout) {
+      onDelete(workout.id);
+    }
+  }
+
+  // Derive displayed workout (for view mode)
+  const displayWorkout = $derived(
+    workout ||
+      ({
+        id: "",
+        sport: editSport,
+        type: editType,
+        name: editName,
+        description: editDescription,
+        durationMinutes: editDuration ? parseInt(editDuration) : undefined,
+        distanceMeters: editDistance ? parseInt(editDistance) : undefined,
+        primaryZone: editZone,
+        humanReadable: editStructure,
+        completed: false,
+      } as Workout)
+  );
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -29,68 +143,182 @@
 <div class="modal-overlay active" onclick={handleBackdropClick} role="dialog" aria-modal="true">
   <div class="modal">
     <div class="modal-header">
-      <div>
-        <div class="modal-sport-badge {workout.sport}">{workout.sport.toUpperCase()}</div>
-        <h2 class="modal-title">{workout.name}</h2>
-        <div class="modal-date">{formatDate(day.date)}</div>
-      </div>
+      {#if currentMode === "view"}
+        <div>
+          <div class="modal-sport-badge {displayWorkout.sport}">
+            {displayWorkout.sport.toUpperCase()}
+          </div>
+          <h2 class="modal-title">{displayWorkout.name}</h2>
+          <div class="modal-date">{formatDate(day.date)}</div>
+        </div>
+      {:else}
+        <div>
+          <h2 class="modal-title">{currentMode === "create" ? "New Workout" : "Edit Workout"}</h2>
+          <div class="modal-date">{formatDate(day.date)}</div>
+        </div>
+      {/if}
       <button class="modal-close" onclick={onClose}>×</button>
     </div>
 
     <div class="modal-body">
-      <div class="modal-stats">
-        {#if workout.durationMinutes}
-          <div class="modal-stat">
-            <div class="modal-stat-value">{formatDuration(workout.durationMinutes)}</div>
-            <div class="modal-stat-label">Duration</div>
-          </div>
-        {/if}
-        {#if workout.distanceMeters}
-          <div class="modal-stat">
-            <div class="modal-stat-value">
-              {formatDistance(workout.distanceMeters, workout.sport, settings)}
+      {#if currentMode === "view"}
+        <!-- View Mode -->
+        <div class="modal-stats">
+          {#if displayWorkout.durationMinutes}
+            <div class="modal-stat">
+              <div class="modal-stat-value">{formatDuration(displayWorkout.durationMinutes)}</div>
+              <div class="modal-stat-label">Duration</div>
             </div>
-            <div class="modal-stat-label">Distance</div>
-          </div>
-        {/if}
-        {#if workout.primaryZone}
-          <div class="modal-stat">
-            <div class="modal-stat-value">
-              {getZoneInfo(workout.sport, workout.primaryZone, settings)}
+          {/if}
+          {#if displayWorkout.distanceMeters}
+            <div class="modal-stat">
+              <div class="modal-stat-value">
+                {formatDistance(displayWorkout.distanceMeters, displayWorkout.sport, settings)}
+              </div>
+              <div class="modal-stat-label">Distance</div>
             </div>
-            <div class="modal-stat-label">Target Zone</div>
+          {/if}
+          {#if displayWorkout.primaryZone}
+            <div class="modal-stat">
+              <div class="modal-stat-value">
+                {getZoneInfo(displayWorkout.sport, displayWorkout.primaryZone, settings)}
+              </div>
+              <div class="modal-stat-label">Target Zone</div>
+            </div>
+          {/if}
+        </div>
+
+        {#if displayWorkout.description}
+          <div class="modal-section">
+            <h4 class="modal-section-title">Description</h4>
+            <p class="modal-description">{displayWorkout.description}</p>
           </div>
         {/if}
-      </div>
 
-      <div class="modal-section">
-        <h4 class="modal-section-title">Description</h4>
-        <p class="modal-description">{workout.description}</p>
-      </div>
+        {#if displayWorkout.humanReadable}
+          <div class="modal-section">
+            <h4 class="modal-section-title">Workout Structure</h4>
+            <pre class="workout-structure">{displayWorkout.humanReadable.replace(
+                /\\n/g,
+                "\n"
+              )}</pre>
+          </div>
+        {/if}
+      {:else}
+        <!-- Edit/Create Mode -->
+        <div class="form-grid">
+          <div class="form-row">
+            <label class="form-label">Sport</label>
+            <select class="form-select" bind:value={editSport}>
+              {#each sports as s}
+                <option value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+              {/each}
+            </select>
+          </div>
 
-      {#if workout.humanReadable}
-        <div class="modal-section">
-          <h4 class="modal-section-title">Workout Structure</h4>
-          <pre class="workout-structure">{workout.humanReadable.replace(/\\n/g, "\n")}</pre>
+          <div class="form-row">
+            <label class="form-label">Type</label>
+            <select class="form-select" bind:value={editType}>
+              {#each workoutTypes as t}
+                <option value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+              {/each}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" bind:value={editName} placeholder="Easy Run" />
+        </div>
+
+        <div class="form-row full">
+          <label class="form-label">Description</label>
+          <textarea
+            class="form-textarea"
+            bind:value={editDescription}
+            placeholder="Conversational pace, focus on form"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-row">
+            <label class="form-label">Duration (minutes)</label>
+            <input type="number" class="form-input" bind:value={editDuration} placeholder="60" />
+          </div>
+
+          <div class="form-row">
+            <label class="form-label">Distance (meters)</label>
+            <input type="number" class="form-input" bind:value={editDistance} placeholder="10000" />
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <label class="form-label">Target Zone</label>
+          <input type="text" class="form-input" bind:value={editZone} placeholder="Zone 2" />
+        </div>
+
+        <div class="form-row full">
+          <label class="form-label">Workout Structure</label>
+          <textarea
+            class="form-textarea mono"
+            bind:value={editStructure}
+            placeholder="Warm-up: 10min easy&#10;Main: 4x1km @ threshold&#10;Cool-down: 10min easy"
+            rows="5"
+          ></textarea>
         </div>
       {/if}
     </div>
 
     <div class="modal-footer">
-      <div></div>
-      <button
-        class="complete-btn"
-        class:mark={!workout.completed}
-        class:unmark={workout.completed}
-        onclick={() => onToggleComplete(workout.id)}
-      >
-        {#if workout.completed}
-          <span>↩</span> Mark Incomplete
-        {:else}
-          <span>✓</span> Mark Complete
-        {/if}
-      </button>
+      {#if currentMode === "view"}
+        <div class="footer-left">
+          <button class="icon-btn edit" onclick={startEdit} title="Edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+          </button>
+          <button class="icon-btn delete" onclick={() => (showDeleteConfirm = true)} title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
+            </svg>
+          </button>
+        </div>
+        <button
+          class="complete-btn"
+          class:mark={!displayWorkout.completed}
+          class:unmark={displayWorkout.completed}
+          onclick={() => onToggleComplete(displayWorkout.id)}
+        >
+          {#if displayWorkout.completed}
+            <span>↩</span> Mark Incomplete
+          {:else}
+            <span>✓</span> Mark Complete
+          {/if}
+        </button>
+      {:else}
+        <button class="cancel-btn" onclick={cancelEdit}>Cancel</button>
+        <button class="save-btn" onclick={handleSave} disabled={!editName}>
+          {currentMode === "create" ? "Add Workout" : "Save Changes"}
+        </button>
+      {/if}
     </div>
+
+    <!-- Delete Confirmation -->
+    {#if showDeleteConfirm}
+      <div class="confirm-overlay">
+        <div class="confirm-dialog">
+          <p>Delete this workout?</p>
+          <div class="confirm-actions">
+            <button class="cancel-btn" onclick={() => (showDeleteConfirm = false)}>Cancel</button>
+            <button class="delete-btn" onclick={handleDelete}>Delete</button>
+          </div>
+        </div>
+      </div>
+    {/if}
   </div>
 </div>
 
@@ -120,11 +348,14 @@
     border-radius: 20px;
     max-width: 600px;
     width: 100%;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow: hidden;
     transform: scale(0.9) translateY(20px);
     transition: transform var(--transition-normal);
     border: 1px solid var(--border-medium);
+    position: relative;
+    display: flex;
+    flex-direction: column;
   }
 
   .modal-overlay.active .modal {
@@ -138,6 +369,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 1rem;
+    flex-shrink: 0;
   }
 
   .modal-sport-badge {
@@ -207,6 +439,7 @@
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
+    flex-shrink: 0;
   }
 
   .modal-close:hover {
@@ -217,7 +450,7 @@
   .modal-body {
     padding: 1.5rem 2rem;
     overflow-y: auto;
-    max-height: calc(80vh - 200px);
+    flex: 1;
   }
 
   .modal-stats {
@@ -276,12 +509,108 @@
     margin: 0;
   }
 
+  /* Form styles */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .form-row.full {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: border-color var(--transition-fast);
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  .form-textarea.mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
   .modal-footer {
     padding: 1rem 2rem;
     border-top: 1px solid var(--border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
+  }
+
+  .footer-left {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--border-medium);
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+  }
+
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .icon-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .icon-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .icon-btn.edit:hover {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .complete-btn {
@@ -314,5 +643,88 @@
 
   .complete-btn.unmark:hover {
     background: var(--bg-elevated);
+  }
+
+  .cancel-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-medium);
+    transition: all var(--transition-fast);
+  }
+
+  .cancel-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+
+  .save-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--accent);
+    color: var(--bg-primary);
+    border: none;
+    transition: all var(--transition-fast);
+  }
+
+  .save-btn:hover:not(:disabled) {
+    background: #fbbf24;
+    transform: translateY(-2px);
+  }
+
+  .save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Delete confirmation */
+  .confirm-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+  }
+
+  .confirm-dialog {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-medium);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .confirm-dialog p {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+  }
+
+  .delete-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: #ef4444;
+    color: white;
+    border: none;
+    transition: all var(--transition-fast);
+  }
+
+  .delete-btn:hover {
+    background: #dc2626;
   }
 </style>
