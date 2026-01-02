@@ -1,0 +1,124 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Core palette */
+  --bg-primary: #0a0a0b;
+  --bg-secondary: #141416;
+  --bg-tertiary: #1c1c1f;
+  --bg-elevated: #232327;
+
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+
+  /* Sport colors */
+  --swim: #06b6d4;
+  --swim-glow: rgba(6, 182, 212, 0.15);
+  --swim-dark: #0e7490;
+
+  --bike: #22c55e;
+  --bike-glow: rgba(34, 197, 94, 0.15);
+  --bike-dark: #15803d;
+
+  --run: #f97316;
+  --run-glow: rgba(249, 115, 22, 0.15);
+  --run-dark: #c2410c;
+
+  --strength: #a855f7;
+  --strength-glow: rgba(168, 85, 247, 0.15);
+  --strength-dark: #7e22ce;
+
+  --brick: #ec4899;
+  --brick-glow: rgba(236, 72, 153, 0.15);
+  --brick-dark: #be185d;
+
+  --race: #eab308;
+  --race-glow: rgba(234, 179, 8, 0.2);
+  --race-dark: #a16207;
+
+  --rest: #52525b;
+  --rest-glow: rgba(82, 82, 91, 0.15);
+
+  /* Accent */
+  --accent: #eab308;
+  --accent-glow: rgba(234, 179, 8, 0.2);
+
+  /* Phase colors */
+  --phase-base: #3b82f6;
+  --phase-build: #8b5cf6;
+  --phase-peak: #ec4899;
+  --phase-taper: #14b8a6;
+
+  /* Timing */
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 400ms;
+
+  /* Spacing */
+  --sidebar-width: 320px;
+}
+
+html {
+  font-size: 15px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    "Outfit",
+    -apple-system,
+    sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Layout */
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Inputs */
+input,
+select {
+  font-family: inherit;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+}

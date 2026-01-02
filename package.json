@@ -8,27 +8,36 @@
   "scripts": {
     "start": "tsx src/cli.ts",
     "build": "tsc",
+    "build:viewer": "vite build --config vite.config.viewer.ts",
     "dev": "tsx watch src/cli.ts",
+    "dev:viewer": "vite --config vite.config.viewer.ts",
     "test": "vitest",
     "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prepublishOnly": "npm run build:viewer"
   },
   "lint-staged": {
-    "*.{js,ts,json,md,html,css}": "prettier --write"
+    "*.{js,ts,json,md,html,css,svelte}": "prettier --write"
   },
   "dependencies": {
     "consola": "^3.2.3",
     "open": "^10.1.0"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@types/node": "^22.10.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.4.2",
+    "prettier-plugin-svelte": "^3.4.1",
+    "svelte": "^5.43.12",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
+    "vite": "^7.2.6",
+    "vite-plugin-singlefile": "^2.3.0",
     "vitest": "^3.2.4"
   }
 }

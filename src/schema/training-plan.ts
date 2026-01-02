@@ -12,7 +12,7 @@
 // Core Types
 // ============================================================================
 
-export type Sport = "swim" | "bike" | "run" | "strength" | "rest";
+export type Sport = "swim" | "bike" | "run" | "strength" | "brick" | "race" | "rest";
 
 export type WorkoutType =
   | "rest"

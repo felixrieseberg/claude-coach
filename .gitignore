@@ -34,3 +34,6 @@ npm-debug.log*
 # Training plans (generated files with date suffix like event-name-2026-03-28.json)
 *-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].json
 *-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].html
+
+# Built template (generated from src/viewer via Vite)
+templates/plan-viewer.html

@@ -1,0 +1,24 @@
+# Viewer source (built template is published instead)
+src/viewer/
+
+# Vite/Svelte config (dev only)
+vite.config.viewer.ts
+svelte.config.js
+
+# Dev/test files
+tests/
+vitest.config.ts
+.husky/
+.prettierrc
+
+# Examples
+examples/
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Git
+.git/
+.gitignore
