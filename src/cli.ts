@@ -98,7 +98,7 @@ async function main() {
   log.success(`Athlete: ${athlete.firstname} ${athlete.lastname}`);
 
   // Step 5: Fetch activities
-  const syncDays = config.sync_days || 365;
+  const syncDays = config.sync_days || 730;
   const afterDate = new Date();
   afterDate.setDate(afterDate.getDate() - syncDays);
 

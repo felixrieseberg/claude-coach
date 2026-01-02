@@ -104,8 +104,8 @@ export async function promptForConfig(): Promise<Config> {
 
   const client_id = await prompt("Enter your Strava Client ID: ");
   const client_secret = await prompt("Enter your Strava Client Secret: ");
-  const sync_days_str = await prompt("Days of history to sync (default 365): ");
-  const sync_days = parseInt(sync_days_str) || 365;
+  const sync_days_str = await prompt("Days of history to sync (default 730): ");
+  const sync_days = parseInt(sync_days_str) || 730;
 
   return {
     strava: { client_id, client_secret },

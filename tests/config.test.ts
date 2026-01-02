@@ -24,7 +24,7 @@ describe("Config", () => {
           client_id: "12345",
           client_secret: "secret123",
         },
-        sync_days: 365,
+        sync_days: 730,
       };
 
       writeFileSync(configFile, JSON.stringify(config, null, 2));
@@ -34,7 +34,7 @@ describe("Config", () => {
       const loaded = JSON.parse(readFileSync(configFile, "utf-8"));
       expect(loaded.strava.client_id).toBe("12345");
       expect(loaded.strava.client_secret).toBe("secret123");
-      expect(loaded.sync_days).toBe(365);
+      expect(loaded.sync_days).toBe(730);
     });
 
     it("should write and read tokens correctly", () => {
