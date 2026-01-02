@@ -168,7 +168,7 @@
               min="100"
               max="220"
             />
-            <button class="recalc-btn" onclick={() => recalcHr("run")}>Recalc</button>
+            <button class="recalc-btn" onclick={() => recalcHr("run")}>Recalculate</button>
           </div>
           <div class="zones-grid">
             <div class="zone-row header">
@@ -216,7 +216,7 @@
               bind:value={localSettings.run.thresholdPace}
               placeholder="4:30"
             />
-            <button class="recalc-btn" onclick={recalcRunPace}>Recalc</button>
+            <button class="recalc-btn" onclick={recalcRunPace}>Recalculate</button>
           </div>
           <div class="zones-grid">
             <div class="zone-row header">
@@ -263,7 +263,7 @@
               min="100"
               max="220"
             />
-            <button class="recalc-btn" onclick={() => recalcHr("bike")}>Recalc</button>
+            <button class="recalc-btn" onclick={() => recalcHr("bike")}>Recalculate</button>
           </div>
           <div class="zones-grid">
             <div class="zone-row header">
@@ -313,7 +313,7 @@
               min="50"
               max="500"
             />
-            <button class="recalc-btn" onclick={recalcPower}>Recalc</button>
+            <button class="recalc-btn" onclick={recalcPower}>Recalculate</button>
           </div>
           <div class="zones-grid">
             <div class="zone-row header">
@@ -367,7 +367,7 @@
               bind:value={localSettings.swim.css}
               placeholder="1:45"
             />
-            <button class="recalc-btn" onclick={recalcSwimPace}>Recalc</button>
+            <button class="recalc-btn" onclick={recalcSwimPace}>Recalculate</button>
           </div>
           <div class="zones-grid">
             <div class="zone-row header">
