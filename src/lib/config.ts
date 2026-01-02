@@ -112,3 +112,10 @@ export async function promptForConfig(): Promise<Config> {
     sync_days,
   };
 }
+
+export function createConfig(client_id: string, client_secret: string, sync_days = 730): Config {
+  return {
+    strava: { client_id, client_secret },
+    sync_days,
+  };
+}

@@ -2,6 +2,9 @@
   "name": "claude-coach",
   "version": "0.1.0",
   "type": "module",
+  "bin": {
+    "claude-coach": "./bin/claude-coach.js"
+  },
   "scripts": {
     "start": "tsx src/cli.ts",
     "build": "tsc",

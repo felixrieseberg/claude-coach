@@ -1,10 +1,68 @@
-import { configExists, loadConfig, promptForConfig, saveConfig, getDbPath } from "./lib/config.js";
+import {
+  configExists,
+  loadConfig,
+  promptForConfig,
+  saveConfig,
+  getDbPath,
+  createConfig,
+} from "./lib/config.js";
 import { log } from "./lib/logging.js";
 import { migrate } from "./db/migrate.js";
 import { execute } from "./db/client.js";
 import { getValidTokens } from "./strava/oauth.js";
 import { getAllActivities, getAthlete } from "./strava/api.js";
 import type { StravaActivity } from "./strava/types.js";
+
+interface CliArgs {
+  clientId?: string;
+  clientSecret?: string;
+  days?: number;
+  help?: boolean;
+}
+
+function parseArgs(): CliArgs {
+  const args: CliArgs = {};
+
+  for (let i = 2; i < process.argv.length; i++) {
+    const arg = process.argv[i];
+
+    if (arg === "--help" || arg === "-h") {
+      args.help = true;
+    } else if (arg.startsWith("--client-id=")) {
+      args.clientId = arg.split("=")[1];
+    } else if (arg.startsWith("--client-secret=")) {
+      args.clientSecret = arg.split("=")[1];
+    } else if (arg.startsWith("--days=")) {
+      args.days = parseInt(arg.split("=")[1]);
+    }
+  }
+
+  return args;
+}
+
+function printHelp(): void {
+  console.log(`
+Claude Coach - Strava Sync
+
+Usage: npx claude-coach [options]
+
+Options:
+  --client-id=ID        Strava API client ID
+  --client-secret=SEC   Strava API client secret
+  --days=N              Days of history to sync (default: 730)
+  --help, -h            Show this help message
+
+Examples:
+  # Interactive mode (prompts for credentials)
+  npx claude-coach
+
+  # Non-interactive mode (for automation/Claude)
+  npx claude-coach --client-id=12345 --client-secret=abc123 --days=730
+
+Note: On first run, you'll need to authorize in the browser.
+After that, tokens are cached and subsequent syncs are automatic.
+`);
+}
 
 function escapeString(str: string | null | undefined): string {
   if (str == null) return "NULL";
@@ -73,17 +131,35 @@ function insertAthlete(athlete: {
 }
 
 async function main() {
+  const args = parseArgs();
+
+  if (args.help) {
+    printHelp();
+    process.exit(0);
+  }
+
   log.box("Claude Coach - Strava Sync");
 
   // Step 1: Check/create config
   if (!configExists()) {
-    log.info("No configuration found. Let's set things up.");
-    const config = await promptForConfig();
-    saveConfig(config);
-    log.success("Configuration saved");
+    // Check if credentials provided via CLI args
+    if (args.clientId && args.clientSecret) {
+      log.info("Creating configuration from command line arguments...");
+      const config = createConfig(args.clientId, args.clientSecret, args.days || 730);
+      saveConfig(config);
+      log.success("Configuration saved");
+    } else {
+      log.info("No configuration found. Let's set things up.");
+      const config = await promptForConfig();
+      saveConfig(config);
+      log.success("Configuration saved");
+    }
   }
 
   const config = loadConfig();
+
+  // Override sync_days if provided via CLI
+  const syncDays = args.days || config.sync_days || 730;
 
   // Step 2: Initialize database
   migrate();
@@ -98,7 +174,6 @@ async function main() {
   log.success(`Athlete: ${athlete.firstname} ${athlete.lastname}`);
 
   // Step 5: Fetch activities
-  const syncDays = config.sync_days || 730;
   const afterDate = new Date();
   afterDate.setDate(afterDate.getDate() - syncDays);
 
