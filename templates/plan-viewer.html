@@ -1,0 +1,2693 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        /* Core palette */
+        --bg-primary: #0a0a0b;
+        --bg-secondary: #141416;
+        --bg-tertiary: #1c1c1f;
+        --bg-elevated: #232327;
+
+        --text-primary: #fafafa;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --border-medium: rgba(255, 255, 255, 0.1);
+
+        /* Sport colors - vivid and distinctive */
+        --swim: #06b6d4;
+        --swim-glow: rgba(6, 182, 212, 0.15);
+        --swim-dark: #0e7490;
+
+        --bike: #22c55e;
+        --bike-glow: rgba(34, 197, 94, 0.15);
+        --bike-dark: #15803d;
+
+        --run: #f97316;
+        --run-glow: rgba(249, 115, 22, 0.15);
+        --run-dark: #c2410c;
+
+        --strength: #a855f7;
+        --strength-glow: rgba(168, 85, 247, 0.15);
+        --strength-dark: #7e22ce;
+
+        --rest: #52525b;
+        --rest-glow: rgba(82, 82, 91, 0.15);
+
+        /* Accent */
+        --accent: #eab308;
+        --accent-glow: rgba(234, 179, 8, 0.2);
+
+        /* Phase colors */
+        --phase-base: #3b82f6;
+        --phase-build: #8b5cf6;
+        --phase-peak: #ec4899;
+        --phase-taper: #14b8a6;
+
+        /* Timing */
+        --transition-fast: 150ms;
+        --transition-normal: 250ms;
+        --transition-slow: 400ms;
+
+        /* Spacing */
+        --sidebar-width: 320px;
+      }
+
+      html {
+        font-size: 15px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          "Outfit",
+          -apple-system,
+          sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--bg-elevated);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+      }
+
+      /* Layout */
+      .app {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: var(--sidebar-width);
+        background: var(--bg-secondary);
+        border-right: 1px solid var(--border-subtle);
+        padding: 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 100;
+      }
+
+      .event-header {
+        text-align: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .event-name {
+        font-family: "Playfair Display", serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      .event-date {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 500;
+        letter-spacing: 0.05em;
+      }
+
+      .athlete-name {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+      }
+
+      /* Progress Ring */
+      .progress-section {
+        text-align: center;
+      }
+
+      .progress-ring-container {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 1rem;
+      }
+
+      .progress-ring {
+        transform: rotate(-90deg);
+      }
+
+      .progress-ring-bg {
+        fill: none;
+        stroke: var(--bg-tertiary);
+        stroke-width: 8;
+      }
+
+      .progress-ring-fill {
+        fill: none;
+        stroke: url(#progressGradient);
+        stroke-width: 8;
+        stroke-linecap: round;
+        stroke-dasharray: 377;
+        stroke-dashoffset: 377;
+        transition: stroke-dashoffset 1s ease-out;
+      }
+
+      .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+
+      .progress-percent {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 2rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .progress-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      .stat-card {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid var(--border-subtle);
+        transition: all var(--transition-normal);
+      }
+
+      .stat-card:hover {
+        border-color: var(--border-medium);
+        transform: translateY(-2px);
+      }
+
+      .stat-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.4rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .stat-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 0.25rem;
+      }
+
+      /* Sport Stats */
+      .sport-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .sport-stat {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg-tertiary);
+        border-radius: 10px;
+        border: 1px solid var(--border-subtle);
+      }
+
+      .sport-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+      }
+
+      .sport-icon.swim {
+        background: var(--swim-glow);
+        color: var(--swim);
+      }
+      .sport-icon.bike {
+        background: var(--bike-glow);
+        color: var(--bike);
+      }
+      .sport-icon.run {
+        background: var(--run-glow);
+        color: var(--run);
+      }
+      .sport-icon.strength {
+        background: var(--strength-glow);
+        color: var(--strength);
+      }
+
+      .sport-info {
+        flex: 1;
+      }
+
+      .sport-name {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .sport-hours {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      /* Filters */
+      .filters-section h3 {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .filter-chip {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border-radius: 20px;
+        border: 1px solid var(--border-medium);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .filter-chip:hover {
+        border-color: var(--text-muted);
+        color: var(--text-primary);
+      }
+
+      .filter-chip.active {
+        background: var(--text-primary);
+        color: var(--bg-primary);
+        border-color: var(--text-primary);
+      }
+
+      .filter-chip.swim.active {
+        background: var(--swim);
+        border-color: var(--swim);
+      }
+      .filter-chip.bike.active {
+        background: var(--bike);
+        border-color: var(--bike);
+      }
+      .filter-chip.run.active {
+        background: var(--run);
+        border-color: var(--run);
+      }
+      .filter-chip.strength.active {
+        background: var(--strength);
+        border-color: var(--strength);
+      }
+
+      /* Main Content */
+      .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width);
+        padding: 2rem;
+      }
+
+      .phase-timeline {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 2rem;
+        padding: 0 1rem;
+      }
+
+      .phase-segment {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        position: relative;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .phase-segment:hover {
+        transform: scaleY(1.5);
+      }
+
+      .phase-segment.base {
+        background: var(--phase-base);
+      }
+      .phase-segment.build {
+        background: var(--phase-build);
+      }
+      .phase-segment.peak {
+        background: var(--phase-peak);
+      }
+      .phase-segment.taper {
+        background: var(--phase-taper);
+      }
+      .phase-segment.recovery {
+        background: var(--rest);
+      }
+
+      .phase-segment::after {
+        content: attr(data-phase);
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity var(--transition-fast);
+      }
+
+      .phase-segment:hover::after {
+        opacity: 1;
+      }
+
+      /* Weeks */
+      .weeks-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .week-card {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        border: 1px solid var(--border-subtle);
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: slideUp 0.5s ease forwards;
+      }
+
+      @keyframes slideUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .week-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .week-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .week-number {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+      }
+
+      .week-phase {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .week-phase.base {
+        color: var(--phase-base);
+      }
+      .week-phase.build {
+        color: var(--phase-build);
+      }
+      .week-phase.peak {
+        color: var(--phase-peak);
+      }
+      .week-phase.taper {
+        color: var(--phase-taper);
+      }
+
+      .week-focus {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .week-hours {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .week-hours span {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      /* Days Grid */
+      .days-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background: var(--border-subtle);
+      }
+
+      .day-column {
+        background: var(--bg-secondary);
+        min-height: 160px;
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .day-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .day-name {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+
+      .day-date {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .day-column.today {
+        background: var(--bg-tertiary);
+      }
+
+      .day-column.today .day-name {
+        color: var(--accent);
+      }
+
+      /* Workout Cards */
+      .workout-card {
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border: 1px solid transparent;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .workout-card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+      }
+
+      .workout-card.swim {
+        background: var(--swim-glow);
+      }
+      .workout-card.swim::before {
+        background: var(--swim);
+      }
+      .workout-card.bike {
+        background: var(--bike-glow);
+      }
+      .workout-card.bike::before {
+        background: var(--bike);
+      }
+      .workout-card.run {
+        background: var(--run-glow);
+      }
+      .workout-card.run::before {
+        background: var(--run);
+      }
+      .workout-card.strength {
+        background: var(--strength-glow);
+      }
+      .workout-card.strength::before {
+        background: var(--strength);
+      }
+      .workout-card.rest {
+        background: var(--rest-glow);
+      }
+      .workout-card.rest::before {
+        background: var(--rest);
+      }
+
+      .workout-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .workout-card.completed {
+        opacity: 0.6;
+      }
+
+      .workout-card.completed::after {
+        content: "✓";
+        position: absolute;
+        top: 0.4rem;
+        right: 0.5rem;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+      }
+
+      .workout-sport {
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 0.2rem;
+      }
+
+      .workout-card.swim .workout-sport {
+        color: var(--swim);
+      }
+      .workout-card.bike .workout-sport {
+        color: var(--bike);
+      }
+      .workout-card.run .workout-sport {
+        color: var(--run);
+      }
+      .workout-card.strength .workout-sport {
+        color: var(--strength);
+      }
+      .workout-card.rest .workout-sport {
+        color: var(--rest);
+      }
+
+      .workout-name {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        line-height: 1.3;
+      }
+
+      .workout-duration {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        opacity: 0;
+        visibility: hidden;
+        transition: all var(--transition-normal);
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background: var(--bg-secondary);
+        border-radius: 20px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 80vh;
+        overflow: hidden;
+        transform: scale(0.9) translateY(20px);
+        transition: transform var(--transition-normal);
+        border: 1px solid var(--border-medium);
+      }
+
+      .modal-overlay.active .modal {
+        transform: scale(1) translateY(0);
+      }
+
+      .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .modal-sport-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+      }
+
+      .modal-sport-badge.swim {
+        background: var(--swim-glow);
+        color: var(--swim);
+      }
+      .modal-sport-badge.bike {
+        background: var(--bike-glow);
+        color: var(--bike);
+      }
+      .modal-sport-badge.run {
+        background: var(--run-glow);
+        color: var(--run);
+      }
+      .modal-sport-badge.strength {
+        background: var(--strength-glow);
+        color: var(--strength);
+      }
+      .modal-sport-badge.rest {
+        background: var(--rest-glow);
+        color: var(--rest);
+      }
+
+      .modal-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .modal-date {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .modal-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid var(--border-medium);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-close:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+
+      .modal-body {
+        padding: 1.5rem 2rem;
+        overflow-y: auto;
+        max-height: calc(80vh - 200px);
+      }
+
+      .modal-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .modal-stat {
+        text-align: center;
+      }
+
+      .modal-stat-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .modal-stat-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+
+      .modal-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .modal-section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+      }
+
+      .modal-description {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+
+      .workout-structure {
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        padding: 1rem;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.85rem;
+        line-height: 1.8;
+        color: var(--text-secondary);
+        white-space: pre-wrap;
+      }
+
+      .modal-footer {
+        padding: 1rem 2rem;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .complete-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border: none;
+      }
+
+      .complete-btn.mark {
+        background: var(--accent);
+        color: var(--bg-primary);
+      }
+
+      .complete-btn.mark:hover {
+        background: #fbbf24;
+        transform: translateY(-2px);
+      }
+
+      .complete-btn.unmark {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-medium);
+      }
+
+      .complete-btn.unmark:hover {
+        background: var(--bg-elevated);
+      }
+
+      /* Mobile */
+      @media (max-width: 1200px) {
+        .days-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      @media (max-width: 900px) {
+        :root {
+          --sidebar-width: 280px;
+        }
+
+        .days-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 700px) {
+        .sidebar {
+          position: fixed;
+          left: -100%;
+          transition: left var(--transition-normal);
+        }
+
+        .sidebar.open {
+          left: 0;
+        }
+
+        .main-content {
+          margin-left: 0;
+          padding: 1rem;
+        }
+
+        .days-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .mobile-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .menu-toggle {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-medium);
+          color: var(--text-primary);
+          font-size: 1.2rem;
+          cursor: pointer;
+        }
+      }
+
+      @media (min-width: 701px) {
+        .mobile-header {
+          display: none;
+        }
+      }
+
+      /* Empty state */
+      .empty-day {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        font-style: italic;
+      }
+
+      /* Animations */
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .loading {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+
+      /* Settings Button */
+      .settings-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-medium);
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        margin-top: auto;
+      }
+
+      .settings-btn:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        border-color: var(--text-muted);
+      }
+
+      .settings-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Settings Modal */
+      .settings-modal {
+        max-width: 520px;
+      }
+
+      .settings-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .settings-section:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+
+      .settings-section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0;
+      }
+
+      .settings-label {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .settings-select {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-medium);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        font-family: inherit;
+        cursor: pointer;
+        min-width: 140px;
+      }
+
+      .settings-select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .settings-select option {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+      }
+
+      /* HR Zones Editor */
+      .zones-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .zone-row {
+        display: grid;
+        grid-template-columns: 60px 1fr 80px 80px;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .zone-row.header {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        padding-bottom: 0.25rem;
+      }
+
+      .zone-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.3rem 0.5rem;
+        border-radius: 6px;
+        text-align: center;
+      }
+
+      .zone-badge.z1 {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+      }
+      .zone-badge.z2 {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+      }
+      .zone-badge.z3 {
+        background: rgba(234, 179, 8, 0.2);
+        color: #eab308;
+      }
+      .zone-badge.z4 {
+        background: rgba(249, 115, 22, 0.2);
+        color: #f97316;
+      }
+      .zone-badge.z5 {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+      }
+
+      .zone-name {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .zone-input {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-medium);
+        border-radius: 6px;
+        padding: 0.4rem 0.5rem;
+        color: var(--text-primary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        text-align: center;
+        width: 100%;
+      }
+
+      .zone-input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .lthr-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+      }
+
+      .lthr-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .lthr-input {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-medium);
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        color: var(--text-primary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.9rem;
+        width: 80px;
+        text-align: center;
+      }
+
+      .recalc-btn {
+        padding: 0.5rem 1rem;
+        background: var(--accent);
+        color: var(--bg-primary);
+        border: none;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .recalc-btn:hover {
+        background: #fbbf24;
+      }
+
+      .settings-note {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        font-style: italic;
+      }
+
+      /* Settings Tabs */
+      .settings-tabs {
+        display: flex;
+        gap: 0.25rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        padding-bottom: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .settings-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all var(--transition-fast);
+      }
+
+      .settings-tab:hover {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+      }
+
+      .settings-tab.active {
+        background: var(--accent);
+        color: var(--bg-primary);
+      }
+
+      .settings-tab-content {
+        display: none;
+      }
+
+      .settings-tab-content.active {
+        display: block;
+      }
+
+      /* Help content */
+      .help-content {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+
+      .help-content ol,
+      .help-content ul {
+        margin: 0.5rem 0 0.5rem 1.5rem;
+      }
+
+      .help-content li {
+        margin-bottom: 0.25rem;
+      }
+
+      .help-content p {
+        margin-bottom: 0.5rem;
+      }
+
+      /* Pace input styling */
+      .pace-input {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-medium);
+        border-radius: 6px;
+        padding: 0.4rem 0.5rem;
+        color: var(--text-primary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        text-align: center;
+        width: 90px;
+      }
+
+      .pace-input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="event-header">
+          <h1 class="event-name" id="eventName">Loading...</h1>
+          <div class="event-date" id="eventDate"></div>
+          <div class="athlete-name" id="athleteName"></div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-ring-container">
+            <svg class="progress-ring" width="140" height="140">
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color: var(--accent)" />
+                  <stop offset="100%" style="stop-color: var(--run)" />
+                </linearGradient>
+              </defs>
+              <circle class="progress-ring-bg" cx="70" cy="70" r="60" />
+              <circle class="progress-ring-fill" id="progressRing" cx="70" cy="70" r="60" />
+            </svg>
+            <div class="progress-text">
+              <div class="progress-percent" id="progressPercent">0%</div>
+              <div class="progress-label">Complete</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalWeeks">0</div>
+            <div class="stat-label">Weeks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalHours">0</div>
+            <div class="stat-label">Hours</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalWorkouts">0</div>
+            <div class="stat-label">Workouts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="daysToEvent">0</div>
+            <div class="stat-label">Days Left</div>
+          </div>
+        </div>
+
+        <div class="sport-stats" id="sportStats"></div>
+
+        <div class="filters-section">
+          <h3>Filter by Sport</h3>
+          <div class="filter-group" id="sportFilters">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip swim" data-filter="swim">Swim</button>
+            <button class="filter-chip bike" data-filter="bike">Bike</button>
+            <button class="filter-chip run" data-filter="run">Run</button>
+            <button class="filter-chip strength" data-filter="strength">Strength</button>
+          </div>
+
+          <h3>Filter by Status</h3>
+          <div class="filter-group" id="statusFilters">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="pending">Pending</button>
+            <button class="filter-chip" data-filter="completed">Completed</button>
+          </div>
+        </div>
+
+        <button class="settings-btn" id="settingsBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+            />
+          </svg>
+          Settings
+        </button>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="mobile-header">
+          <button class="menu-toggle" id="menuToggle">☰</button>
+          <h2 class="event-name" id="mobileEventName">Training Plan</h2>
+        </div>
+
+        <div class="phase-timeline" id="phaseTimeline"></div>
+
+        <div class="weeks-container" id="weeksContainer">
+          <!-- Weeks will be rendered here -->
+        </div>
+      </main>
+    </div>
+
+    <!-- Workout Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-sport-badge" id="modalSport">SWIM</div>
+            <h2 class="modal-title" id="modalTitle">Workout Name</h2>
+            <div class="modal-date" id="modalDate">Monday, January 6</div>
+          </div>
+          <button class="modal-close" id="modalClose">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-stats" id="modalStats"></div>
+          <div class="modal-section">
+            <h4 class="modal-section-title">Description</h4>
+            <p class="modal-description" id="modalDescription"></p>
+          </div>
+          <div class="modal-section" id="modalStructureSection">
+            <h4 class="modal-section-title">Workout Structure</h4>
+            <div class="workout-structure" id="modalStructure"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div id="modalZone"></div>
+          <button class="complete-btn mark" id="modalCompleteBtn">
+            <span>✓</span> Mark Complete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsOverlay">
+      <div class="modal settings-modal" style="max-width: 640px; max-height: 90vh">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title">Settings</h2>
+          </div>
+          <button class="modal-close" id="settingsClose">×</button>
+        </div>
+        <div class="modal-body" style="max-height: calc(90vh - 80px)">
+          <!-- Tabs -->
+          <div class="settings-tabs">
+            <button class="settings-tab active" data-tab="general">General</button>
+            <button class="settings-tab" data-tab="run">🏃 Run</button>
+            <button class="settings-tab" data-tab="bike">🚴 Bike</button>
+            <button class="settings-tab" data-tab="swim">🏊 Swim</button>
+            <button class="settings-tab" data-tab="help">How to Calculate</button>
+          </div>
+
+          <!-- General Tab -->
+          <div class="settings-tab-content active" id="tab-general">
+            <div class="settings-section">
+              <h4 class="settings-section-title">Distance Units</h4>
+              <div class="settings-row">
+                <span class="settings-label">🏊 Swim</span>
+                <select class="settings-select" id="swimUnit">
+                  <option value="meters">Meters</option>
+                  <option value="yards">Yards</option>
+                </select>
+              </div>
+              <div class="settings-row">
+                <span class="settings-label">🚴 Bike</span>
+                <select class="settings-select" id="bikeUnit">
+                  <option value="kilometers">Kilometers</option>
+                  <option value="miles">Miles</option>
+                </select>
+              </div>
+              <div class="settings-row">
+                <span class="settings-label">🏃 Run</span>
+                <select class="settings-select" id="runUnit">
+                  <option value="kilometers">Kilometers</option>
+                  <option value="miles">Miles</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h4 class="settings-section-title">Calendar</h4>
+              <div class="settings-row">
+                <span class="settings-label">First day of week</span>
+                <select class="settings-select" id="firstDayOfWeek">
+                  <option value="monday">Monday</option>
+                  <option value="sunday">Sunday</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Run Tab -->
+          <div class="settings-tab-content" id="tab-run">
+            <div class="settings-section">
+              <h4 class="settings-section-title">Run Heart Rate Zones</h4>
+              <div class="lthr-row">
+                <span class="lthr-label">Run LTHR</span>
+                <input type="number" class="lthr-input" id="runLthr" min="100" max="220" />
+                <button class="recalc-btn" data-sport="run" data-type="hr">Recalc</button>
+              </div>
+              <div class="zones-grid" id="runHrZones"></div>
+            </div>
+            <div class="settings-section">
+              <h4 class="settings-section-title">Run Pace Zones</h4>
+              <div class="lthr-row">
+                <span class="lthr-label">Threshold Pace</span>
+                <input
+                  type="text"
+                  class="lthr-input"
+                  id="runThresholdPace"
+                  placeholder="4:30/km"
+                  style="width: 100px"
+                />
+                <button class="recalc-btn" data-sport="run" data-type="pace">Recalc</button>
+              </div>
+              <div class="zones-grid" id="runPaceZones"></div>
+            </div>
+          </div>
+
+          <!-- Bike Tab -->
+          <div class="settings-tab-content" id="tab-bike">
+            <div class="settings-section">
+              <h4 class="settings-section-title">Bike Heart Rate Zones</h4>
+              <div class="lthr-row">
+                <span class="lthr-label">Bike LTHR</span>
+                <input type="number" class="lthr-input" id="bikeLthr" min="100" max="220" />
+                <button class="recalc-btn" data-sport="bike" data-type="hr">Recalc</button>
+              </div>
+              <div class="zones-grid" id="bikeHrZones"></div>
+            </div>
+            <div class="settings-section">
+              <h4 class="settings-section-title">Bike Power Zones</h4>
+              <div class="lthr-row">
+                <span class="lthr-label">FTP (watts)</span>
+                <input type="number" class="lthr-input" id="bikeFtp" min="50" max="500" />
+                <button class="recalc-btn" data-sport="bike" data-type="power">Recalc</button>
+              </div>
+              <div class="zones-grid" id="bikePowerZones"></div>
+            </div>
+          </div>
+
+          <!-- Swim Tab -->
+          <div class="settings-tab-content" id="tab-swim">
+            <div class="settings-section">
+              <h4 class="settings-section-title">Swim Pace Zones</h4>
+              <div class="lthr-row">
+                <span class="lthr-label">CSS (Critical Swim Speed)</span>
+                <input
+                  type="text"
+                  class="lthr-input"
+                  id="swimCss"
+                  placeholder="1:45/100m"
+                  style="width: 110px"
+                />
+                <button class="recalc-btn" data-sport="swim" data-type="pace">Recalc</button>
+              </div>
+              <div class="zones-grid" id="swimPaceZones"></div>
+            </div>
+          </div>
+
+          <!-- Help Tab -->
+          <div class="settings-tab-content" id="tab-help">
+            <div class="settings-section">
+              <h4 class="settings-section-title">How to Find Your Lactate Threshold HR (LTHR)</h4>
+              <div class="help-content">
+                <p><strong>30-Minute Test (Recommended):</strong></p>
+                <ol>
+                  <li>Warm up for 15 minutes</li>
+                  <li>Run or bike as hard as you can sustain for 30 minutes</li>
+                  <li>Your average HR for the last 20 minutes is your LTHR</li>
+                </ol>
+                <p class="settings-note">
+                  Run and bike LTHR are usually different. Bike LTHR is typically 5-10 bpm lower
+                  than run.
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h4 class="settings-section-title">
+                How to Find Your FTP (Functional Threshold Power)
+              </h4>
+              <div class="help-content">
+                <p><strong>20-Minute Test:</strong></p>
+                <ol>
+                  <li>Warm up for 20 minutes including a few hard efforts</li>
+                  <li>Ride as hard as you can sustain for 20 minutes</li>
+                  <li>FTP = Average power × 0.95</li>
+                </ol>
+                <p><strong>Ramp Test (on trainer apps):</strong></p>
+                <p>Most trainer apps (Zwift, TrainerRoad) have built-in FTP tests.</p>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h4 class="settings-section-title">How to Find Your CSS (Critical Swim Speed)</h4>
+              <div class="help-content">
+                <p><strong>CSS Test:</strong></p>
+                <ol>
+                  <li>Warm up for 10 minutes</li>
+                  <li>Swim 400m all-out, record time (T400)</li>
+                  <li>Rest 5-10 minutes</li>
+                  <li>Swim 200m all-out, record time (T200)</li>
+                  <li>CSS = (T400 - T200) ÷ 2 = pace per 100m</li>
+                </ol>
+                <p>
+                  <strong>Example:</strong> 400m in 6:40 (400s), 200m in 3:00 (180s)<br />
+                  CSS = (400 - 180) ÷ 2 = 110 sec/100m = 1:50/100m
+                </p>
+              </div>
+            </div>
+
+            <div class="settings-section">
+              <h4 class="settings-section-title">How to Find Your Threshold Run Pace</h4>
+              <div class="help-content">
+                <p><strong>Option 1: Race-Based</strong></p>
+                <ul>
+                  <li>Recent 5K race pace + 15-20 sec/km</li>
+                  <li>Recent 10K race pace + 5-10 sec/km</li>
+                </ul>
+                <p><strong>Option 2: 30-Minute Test</strong></p>
+                <p>Run 30 minutes at max sustainable effort. Average pace ≈ threshold.</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="settings-note" style="margin-top: 1rem">All changes are auto-saved.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan Data (will be replaced by CLI) -->
+    <script type="application/json" id="plan-data">
+      {
+        "meta": {
+          "id": "demo-plan",
+          "athlete": "Demo Athlete",
+          "event": "Ironman 70.3 Oceanside",
+          "eventDate": "2026-03-29",
+          "planStartDate": "2025-12-30",
+          "createdAt": "2025-01-01",
+          "totalWeeks": 13
+        },
+        "phases": [
+          { "name": "Base", "startWeek": 1, "endWeek": 4, "focus": "Aerobic development" },
+          { "name": "Build", "startWeek": 5, "endWeek": 9, "focus": "Race-specific fitness" },
+          { "name": "Peak", "startWeek": 10, "endWeek": 11, "focus": "Top-end fitness" },
+          { "name": "Taper", "startWeek": 12, "endWeek": 13, "focus": "Recovery & sharpening" }
+        ],
+        "weeks": [
+          {
+            "weekNumber": 1,
+            "startDate": "2025-12-30",
+            "phase": "Base",
+            "focus": "Aerobic base, technique",
+            "targetHours": 8,
+            "isRecoveryWeek": false,
+            "days": [
+              {
+                "date": "2025-12-30",
+                "dayOfWeek": "Monday",
+                "workouts": [
+                  {
+                    "id": "w1-1",
+                    "sport": "rest",
+                    "type": "rest",
+                    "name": "Rest Day",
+                    "description": "Active recovery or complete rest",
+                    "completed": false
+                  }
+                ]
+              },
+              {
+                "date": "2025-12-31",
+                "dayOfWeek": "Tuesday",
+                "workouts": [
+                  {
+                    "id": "w1-2",
+                    "sport": "swim",
+                    "type": "technique",
+                    "name": "Technique + Endurance",
+                    "description": "Drill focus with aerobic base work",
+                    "durationMinutes": 45,
+                    "humanReadable": "Warm-up: 300m easy\\n4x50m drills\\nMain: 5x200m @ CSS+10\\nCool-down: 200m",
+                    "completed": false
+                  }
+                ]
+              },
+              {
+                "date": "2026-01-01",
+                "dayOfWeek": "Wednesday",
+                "workouts": [
+                  {
+                    "id": "w1-3",
+                    "sport": "run",
+                    "type": "endurance",
+                    "name": "Easy Run",
+                    "description": "Zone 2 aerobic run, conversational pace",
+                    "durationMinutes": 50,
+                    "primaryZone": "Zone 2",
+                    "completed": false
+                  }
+                ]
+              },
+              {
+                "date": "2026-01-02",
+                "dayOfWeek": "Thursday",
+                "workouts": [
+                  {
+                    "id": "w1-4",
+                    "sport": "bike",
+                    "type": "endurance",
+                    "name": "Easy Spin",
+                    "description": "Recovery ride with high cadence",
+                    "durationMinutes": 60,
+                    "primaryZone": "Zone 2",
+                    "completed": false
+                  }
+                ]
+              },
+              {
+                "date": "2026-01-03",
+                "dayOfWeek": "Friday",
+                "workouts": [
+                  {
+                    "id": "w1-5",
+                    "sport": "swim",
+                    "type": "technique",
+                    "name": "Drill Day",
+                    "description": "Technique focused session",
+                    "durationMinutes": 30,
+                    "completed": false
+                  }
+                ]
+              },
+              {
+                "date": "2026-01-04",
+                "dayOfWeek": "Saturday",
+                "workouts": [
+                  {
+                    "id": "w1-6",
+                    "sport": "bike",
+                    "type": "long",
+                    "name": "Long Ride",
+                    "description": "Endurance ride, steady effort",
+                    "durationMinutes": 120,
+                    "primaryZone": "Zone 2",
+                    "completed": false
+                  }
+                ]
+              },
+              {
+                "date": "2026-01-05",
+                "dayOfWeek": "Sunday",
+                "workouts": [
+                  {
+                    "id": "w1-7",
+                    "sport": "run",
+                    "type": "long",
+                    "name": "Long Run",
+                    "description": "Build endurance, easy effort",
+                    "durationMinutes": 75,
+                    "primaryZone": "Zone 2",
+                    "completed": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <script>
+      // State
+      let plan = null;
+      let completedWorkouts = {};
+      let activeFilters = { sport: "all", status: "all" };
+      let currentWorkout = null;
+
+      // Default settings
+      const defaultSettings = {
+        units: {
+          swim: "meters",
+          bike: "kilometers",
+          run: "kilometers",
+        },
+        firstDayOfWeek: "monday",
+        run: {
+          lthr: 165,
+          hrZones: [
+            { zone: 1, name: "Recovery", low: 0, high: 134 },
+            { zone: 2, name: "Aerobic", low: 134, high: 147 },
+            { zone: 3, name: "Tempo", low: 147, high: 156 },
+            { zone: 4, name: "Threshold", low: 156, high: 165 },
+            { zone: 5, name: "VO2max", low: 165, high: 180 },
+          ],
+          thresholdPace: "4:30",
+          paceZones: [
+            { zone: "E", name: "Easy", pace: "5:20" },
+            { zone: "M", name: "Marathon", pace: "4:50" },
+            { zone: "T", name: "Threshold", pace: "4:30" },
+            { zone: "I", name: "Interval", pace: "4:00" },
+            { zone: "R", name: "Repetition", pace: "3:40" },
+          ],
+        },
+        bike: {
+          lthr: 160,
+          hrZones: [
+            { zone: 1, name: "Recovery", low: 0, high: 130 },
+            { zone: 2, name: "Aerobic", low: 130, high: 142 },
+            { zone: 3, name: "Tempo", low: 142, high: 151 },
+            { zone: 4, name: "Threshold", low: 151, high: 160 },
+            { zone: 5, name: "VO2max", low: 160, high: 175 },
+          ],
+          ftp: 200,
+          powerZones: [
+            { zone: 1, name: "Active Recovery", low: 0, high: 110 },
+            { zone: 2, name: "Endurance", low: 110, high: 150 },
+            { zone: 3, name: "Tempo", low: 150, high: 180 },
+            { zone: 4, name: "Threshold", low: 180, high: 210 },
+            { zone: 5, name: "VO2max", low: 210, high: 240 },
+          ],
+        },
+        swim: {
+          css: "1:50",
+          cssSeconds: 110,
+          paceZones: [
+            { zone: 1, name: "Recovery", offset: 20, pace: "2:10" },
+            { zone: 2, name: "Aerobic", offset: 10, pace: "2:00" },
+            { zone: 3, name: "Tempo", offset: 5, pace: "1:55" },
+            { zone: 4, name: "Threshold", offset: 0, pace: "1:50" },
+            { zone: 5, name: "VO2max", offset: -5, pace: "1:45" },
+          ],
+        },
+      };
+
+      let settings = JSON.parse(JSON.stringify(defaultSettings));
+
+      // Unit conversion constants
+      const METERS_PER_YARD = 0.9144;
+      const KM_PER_MILE = 1.60934;
+
+      // Load plan data
+      function loadPlan() {
+        const planDataEl = document.getElementById("plan-data");
+        plan = JSON.parse(planDataEl.textContent);
+
+        // Load completed state from localStorage
+        const saved = localStorage.getItem(`plan-${plan.meta.id}-completed`);
+        if (saved) {
+          completedWorkouts = JSON.parse(saved);
+          // Apply to plan
+          plan.weeks.forEach((week) => {
+            week.days.forEach((day) => {
+              day.workouts.forEach((w) => {
+                if (completedWorkouts[w.id]) {
+                  w.completed = true;
+                }
+              });
+            });
+          });
+        }
+      }
+
+      // Save completed state
+      function saveCompleted() {
+        localStorage.setItem(`plan-${plan.meta.id}-completed`, JSON.stringify(completedWorkouts));
+      }
+
+      // Load settings from localStorage, merging with plan defaults
+      function loadSettings() {
+        // Start with defaults
+        settings = JSON.parse(JSON.stringify(defaultSettings));
+
+        // Merge with plan preferences if available
+        if (plan.preferences) {
+          settings.units.swim = plan.preferences.swim || settings.units.swim;
+          settings.units.bike = plan.preferences.bike || settings.units.bike;
+          settings.units.run = plan.preferences.run || settings.units.run;
+          settings.firstDayOfWeek = plan.preferences.firstDayOfWeek || settings.firstDayOfWeek;
+        }
+
+        // Merge with plan zones if available
+        if (plan.zones?.run?.hr) {
+          settings.run.lthr = plan.zones.run.hr.lthr;
+          settings.run.hrZones = plan.zones.run.hr.zones.map((z) => ({
+            zone: z.zone,
+            name: z.name,
+            low: z.hrLow,
+            high: z.hrHigh,
+          }));
+        }
+        if (plan.zones?.run?.pace) {
+          settings.run.thresholdPace =
+            plan.zones.run.pace.thresholdPace || settings.run.thresholdPace;
+          if (plan.zones.run.pace.zones) {
+            settings.run.paceZones = plan.zones.run.pace.zones.map((z) => ({
+              zone: z.zone,
+              name: z.name,
+              pace: z.pace,
+            }));
+          }
+        }
+        if (plan.zones?.bike?.hr) {
+          settings.bike.lthr = plan.zones.bike.hr.lthr;
+          settings.bike.hrZones = plan.zones.bike.hr.zones.map((z) => ({
+            zone: z.zone,
+            name: z.name,
+            low: z.hrLow,
+            high: z.hrHigh,
+          }));
+        }
+        if (plan.zones?.bike?.power) {
+          settings.bike.ftp = plan.zones.bike.power.ftp;
+          settings.bike.powerZones = plan.zones.bike.power.zones.map((z) => ({
+            zone: z.zone,
+            name: z.name,
+            low: z.wattsLow,
+            high: z.wattsHigh,
+          }));
+        }
+        if (plan.zones?.swim) {
+          settings.swim.css = plan.zones.swim.css || settings.swim.css;
+          settings.swim.cssSeconds = plan.zones.swim.cssSeconds || settings.swim.cssSeconds;
+          if (plan.zones.swim.zones) {
+            settings.swim.paceZones = plan.zones.swim.zones.map((z) => ({
+              zone: z.zone,
+              name: z.name,
+              offset: z.paceOffset,
+              pace: z.pace,
+            }));
+          }
+        }
+
+        // Override with user's saved settings
+        const saved = localStorage.getItem(`plan-${plan.meta.id}-settings`);
+        if (saved) {
+          const userSettings = JSON.parse(saved);
+          if (userSettings.units) settings.units = { ...settings.units, ...userSettings.units };
+          if (userSettings.firstDayOfWeek) settings.firstDayOfWeek = userSettings.firstDayOfWeek;
+          if (userSettings.run) settings.run = { ...settings.run, ...userSettings.run };
+          if (userSettings.bike) settings.bike = { ...settings.bike, ...userSettings.bike };
+          if (userSettings.swim) settings.swim = { ...settings.swim, ...userSettings.swim };
+        }
+      }
+
+      // Save settings to localStorage
+      function saveSettings() {
+        localStorage.setItem(`plan-${plan.meta.id}-settings`, JSON.stringify(settings));
+      }
+
+      // Convert distance based on sport and settings
+      function formatDistance(meters, sport) {
+        if (!meters) return "";
+
+        if (sport === "swim") {
+          if (settings.units.swim === "yards") {
+            const yards = meters / METERS_PER_YARD;
+            return `${Math.round(yards)}yd`;
+          }
+          return `${Math.round(meters)}m`;
+        }
+
+        if (sport === "bike" || sport === "run") {
+          const unit = settings.units[sport];
+          if (unit === "miles") {
+            const miles = meters / 1000 / KM_PER_MILE;
+            return miles >= 10 ? `${Math.round(miles)}mi` : `${miles.toFixed(1)}mi`;
+          }
+          const km = meters / 1000;
+          return km >= 10 ? `${Math.round(km)}km` : `${km.toFixed(1)}km`;
+        }
+
+        return `${Math.round(meters)}m`;
+      }
+
+      // Recalculate HR zones from LTHR
+      function recalculateHrZones(sport, lthr) {
+        const percentages = [
+          { zone: 1, name: "Recovery", lowPct: 0, highPct: 81 },
+          { zone: 2, name: "Aerobic", lowPct: 81, highPct: 89 },
+          { zone: 3, name: "Tempo", lowPct: 89, highPct: 94 },
+          { zone: 4, name: "Threshold", lowPct: 94, highPct: 100 },
+          { zone: 5, name: "VO2max", lowPct: 100, highPct: 106 },
+        ];
+        settings[sport].lthr = lthr;
+        settings[sport].hrZones = percentages.map((p) => ({
+          zone: p.zone,
+          name: p.name,
+          low: Math.round((lthr * p.lowPct) / 100),
+          high: Math.round((lthr * p.highPct) / 100),
+        }));
+      }
+
+      // Recalculate power zones from FTP
+      function recalculatePowerZones(ftp) {
+        const percentages = [
+          { zone: 1, name: "Active Recovery", lowPct: 0, highPct: 55 },
+          { zone: 2, name: "Endurance", lowPct: 55, highPct: 75 },
+          { zone: 3, name: "Tempo", lowPct: 75, highPct: 90 },
+          { zone: 4, name: "Threshold", lowPct: 90, highPct: 105 },
+          { zone: 5, name: "VO2max", lowPct: 105, highPct: 120 },
+        ];
+        settings.bike.ftp = ftp;
+        settings.bike.powerZones = percentages.map((p) => ({
+          zone: p.zone,
+          name: p.name,
+          low: Math.round((ftp * p.lowPct) / 100),
+          high: Math.round((ftp * p.highPct) / 100),
+        }));
+      }
+
+      // Parse pace string to seconds (e.g., "4:30" -> 270)
+      function paceToSeconds(pace) {
+        const parts = pace.split(":");
+        return parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+      }
+
+      // Format seconds to pace string (e.g., 270 -> "4:30")
+      function secondsToPace(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.round(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
+      }
+
+      // Recalculate run pace zones from threshold pace
+      function recalculateRunPaceZones(thresholdPace) {
+        const tSeconds = paceToSeconds(thresholdPace);
+        // Based on Daniels' running formula approximations
+        const zones = [
+          { zone: "E", name: "Easy", factor: 1.18 },
+          { zone: "M", name: "Marathon", factor: 1.07 },
+          { zone: "T", name: "Threshold", factor: 1.0 },
+          { zone: "I", name: "Interval", factor: 0.89 },
+          { zone: "R", name: "Repetition", factor: 0.82 },
+        ];
+        settings.run.thresholdPace = thresholdPace;
+        settings.run.paceZones = zones.map((z) => ({
+          zone: z.zone,
+          name: z.name,
+          pace: secondsToPace(Math.round(tSeconds * z.factor)),
+        }));
+      }
+
+      // Recalculate swim pace zones from CSS
+      function recalculateSwimPaceZones(css) {
+        const cssSeconds = paceToSeconds(css);
+        const offsets = [
+          { zone: 1, name: "Recovery", offset: 20 },
+          { zone: 2, name: "Aerobic", offset: 10 },
+          { zone: 3, name: "Tempo", offset: 5 },
+          { zone: 4, name: "Threshold", offset: 0 },
+          { zone: 5, name: "VO2max", offset: -5 },
+        ];
+        settings.swim.css = css;
+        settings.swim.cssSeconds = cssSeconds;
+        settings.swim.paceZones = offsets.map((z) => ({
+          zone: z.zone,
+          name: z.name,
+          offset: z.offset,
+          pace: secondsToPace(cssSeconds + z.offset),
+        }));
+      }
+
+      // Render HR zones grid
+      function renderHrZonesGrid(containerId, zones, sport) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+        <div class="zone-row header">
+          <span>Zone</span><span>Name</span><span>Low</span><span>High</span>
+        </div>
+        ${zones
+          .map(
+            (z, i) => `
+          <div class="zone-row">
+            <span class="zone-badge z${z.zone}">Z${z.zone}</span>
+            <span class="zone-name">${z.name}</span>
+            <input type="number" class="zone-input" data-sport="${sport}" data-type="hr" data-zone="${i}" data-bound="low" value="${z.low}" min="60" max="220">
+            <input type="number" class="zone-input" data-sport="${sport}" data-type="hr" data-zone="${i}" data-bound="high" value="${z.high}" min="60" max="220">
+          </div>
+        `
+          )
+          .join("")}
+      `;
+      }
+
+      // Render power zones grid
+      function renderPowerZonesGrid(containerId, zones) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+        <div class="zone-row header">
+          <span>Zone</span><span>Name</span><span>Low W</span><span>High W</span>
+        </div>
+        ${zones
+          .map(
+            (z, i) => `
+          <div class="zone-row">
+            <span class="zone-badge z${z.zone}">Z${z.zone}</span>
+            <span class="zone-name">${z.name}</span>
+            <input type="number" class="zone-input" data-sport="bike" data-type="power" data-zone="${i}" data-bound="low" value="${z.low}" min="0" max="600">
+            <input type="number" class="zone-input" data-sport="bike" data-type="power" data-zone="${i}" data-bound="high" value="${z.high}" min="0" max="600">
+          </div>
+        `
+          )
+          .join("")}
+      `;
+      }
+
+      // Render pace zones grid (run)
+      function renderRunPaceZonesGrid(containerId, zones) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+        <div class="zone-row header">
+          <span>Zone</span><span>Name</span><span colspan="2">Pace/km</span>
+        </div>
+        ${zones
+          .map(
+            (z, i) => `
+          <div class="zone-row">
+            <span class="zone-badge z${i + 1}">${z.zone}</span>
+            <span class="zone-name">${z.name}</span>
+            <input type="text" class="pace-input" data-sport="run" data-type="pace" data-zone="${i}" value="${z.pace}" style="grid-column: span 2;">
+          </div>
+        `
+          )
+          .join("")}
+      `;
+      }
+
+      // Render swim pace zones grid
+      function renderSwimPaceZonesGrid(containerId, zones) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+        <div class="zone-row header">
+          <span>Zone</span><span>Name</span><span>Offset</span><span>Pace/100</span>
+        </div>
+        ${zones
+          .map(
+            (z, i) => `
+          <div class="zone-row">
+            <span class="zone-badge z${z.zone}">Z${z.zone}</span>
+            <span class="zone-name">${z.name}</span>
+            <span class="zone-name">${z.offset >= 0 ? "+" : ""}${z.offset}s</span>
+            <input type="text" class="pace-input" data-sport="swim" data-type="pace" data-zone="${i}" value="${z.pace}">
+          </div>
+        `
+          )
+          .join("")}
+      `;
+      }
+
+      // Get zone info for a workout based on sport and primaryZone string
+      function getZoneInfo(sport, zoneStr) {
+        if (!zoneStr) return null;
+
+        // Parse zone string like "Zone 2", "Zone 3-4", "Z2"
+        const match = zoneStr.match(/(?:Zone\s*)?(\d)(?:\s*-\s*(\d))?/i);
+        if (!match) return zoneStr;
+
+        const z1 = parseInt(match[1]);
+        const z2 = match[2] ? parseInt(match[2]) : z1;
+
+        let info = zoneStr;
+
+        if (sport === "run" || sport === "bike") {
+          const hrZones = settings[sport]?.hrZones;
+          if (hrZones && hrZones[z1 - 1]) {
+            const low = hrZones[z1 - 1].low;
+            const high = z2 !== z1 && hrZones[z2 - 1] ? hrZones[z2 - 1].high : hrZones[z1 - 1].high;
+            info += ` (${low}-${high} bpm)`;
+          }
+        }
+
+        return info;
+      }
+
+      // Format duration
+      function formatDuration(minutes) {
+        if (!minutes) return "";
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        if (h > 0) {
+          return m > 0 ? `${h}h ${m}m` : `${h}h`;
+        }
+        return `${m}m`;
+      }
+
+      // Format date
+      function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      // Calculate stats
+      function calculateStats() {
+        let totalWorkouts = 0;
+        let completedCount = 0;
+        let totalMinutes = 0;
+        const sportHours = { swim: 0, bike: 0, run: 0, strength: 0 };
+
+        plan.weeks.forEach((week) => {
+          week.days.forEach((day) => {
+            day.workouts.forEach((w) => {
+              if (w.sport !== "rest") {
+                totalWorkouts++;
+                if (w.completed) completedCount++;
+                if (w.durationMinutes) {
+                  totalMinutes += w.durationMinutes;
+                  if (sportHours[w.sport] !== undefined) {
+                    sportHours[w.sport] += w.durationMinutes / 60;
+                  }
+                }
+              }
+            });
+          });
+        });
+
+        return {
+          totalWorkouts,
+          completedCount,
+          totalHours: (totalMinutes / 60).toFixed(0),
+          sportHours,
+          progress: totalWorkouts > 0 ? Math.round((completedCount / totalWorkouts) * 100) : 0,
+        };
+      }
+
+      // Render sidebar
+      function renderSidebar() {
+        const stats = calculateStats();
+
+        document.getElementById("eventName").textContent = plan.meta.event;
+        document.getElementById("mobileEventName").textContent = plan.meta.event;
+        document.getElementById("eventDate").textContent = new Date(
+          plan.meta.eventDate
+        ).toLocaleDateString("en-US", {
+          weekday: "long",
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+        document.getElementById("athleteName").textContent = plan.meta.athlete;
+
+        document.getElementById("totalWeeks").textContent = plan.meta.totalWeeks;
+        document.getElementById("totalHours").textContent = stats.totalHours;
+        document.getElementById("totalWorkouts").textContent = stats.totalWorkouts;
+
+        const daysLeft = Math.ceil(
+          (new Date(plan.meta.eventDate) - new Date()) / (1000 * 60 * 60 * 24)
+        );
+        document.getElementById("daysToEvent").textContent = Math.max(0, daysLeft);
+
+        // Progress ring
+        const progressRing = document.getElementById("progressRing");
+        const circumference = 2 * Math.PI * 60;
+        const offset = circumference - (stats.progress / 100) * circumference;
+        setTimeout(() => {
+          progressRing.style.strokeDashoffset = offset;
+        }, 100);
+        document.getElementById("progressPercent").textContent = `${stats.progress}%`;
+
+        // Sport stats
+        const sportStatsEl = document.getElementById("sportStats");
+        const sportIcons = { swim: "🏊", bike: "🚴", run: "🏃", strength: "💪" };
+        sportStatsEl.innerHTML = Object.entries(stats.sportHours)
+          .filter(([_, hours]) => hours > 0)
+          .map(
+            ([sport, hours]) => `
+          <div class="sport-stat">
+            <div class="sport-icon ${sport}">${sportIcons[sport]}</div>
+            <div class="sport-info">
+              <div class="sport-name">${sport.charAt(0).toUpperCase() + sport.slice(1)}</div>
+              <div class="sport-hours">${hours.toFixed(1)} hours</div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      // Render phase timeline
+      function renderPhaseTimeline() {
+        const timeline = document.getElementById("phaseTimeline");
+        timeline.innerHTML = plan.phases
+          .map((phase) => {
+            const weeks = phase.endWeek - phase.startWeek + 1;
+            const phaseName = phase.name.toLowerCase();
+            return `<div class="phase-segment ${phaseName}" style="flex: ${weeks}" data-phase="${phase.name}"></div>`;
+          })
+          .join("");
+      }
+
+      // Get ordered day names based on firstDayOfWeek setting
+      function getOrderedDays() {
+        if (settings.firstDayOfWeek === "monday") {
+          return ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        }
+        return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      }
+
+      // Build a full 7-day week, filling in missing days
+      function buildFullWeek(weekData) {
+        const orderedDays = getOrderedDays();
+        const dayMap = {};
+
+        // Create a map of existing days
+        weekData.days.forEach((day) => {
+          dayMap[day.dayOfWeek] = day;
+        });
+
+        // Generate dates for each day of the week based on startDate
+        const startDate = new Date(weekData.startDate + "T00:00:00");
+        const startDayName = startDate.toLocaleDateString("en-US", { weekday: "long" });
+
+        // Find offset: how many days from first ordered day to the start day
+        const startIdx = orderedDays.indexOf(startDayName);
+
+        // Build full week
+        return orderedDays.map((dayName, idx) => {
+          if (dayMap[dayName]) {
+            return dayMap[dayName];
+          }
+
+          // Calculate the date for this day
+          // Find how many days offset from startDate
+          let dayOffset = idx - startIdx;
+          if (dayOffset < 0) dayOffset += 7;
+
+          const date = new Date(startDate);
+          date.setDate(date.getDate() + dayOffset);
+
+          // Return an empty day placeholder
+          return {
+            date: date.toISOString().split("T")[0],
+            dayOfWeek: dayName,
+            workouts: [],
+          };
+        });
+      }
+
+      // Render weeks
+      function renderWeeks() {
+        const container = document.getElementById("weeksContainer");
+        const today = new Date().toISOString().split("T")[0];
+
+        container.innerHTML = plan.weeks
+          .map((week, index) => {
+            const phaseName = week.phase.toLowerCase();
+            const fullWeek = buildFullWeek(week);
+
+            return `
+          <div class="week-card" style="animation-delay: ${index * 0.05}s">
+            <div class="week-header">
+              <div class="week-title">
+                <span class="week-number">W${week.weekNumber}</span>
+                <span class="week-phase ${phaseName}">${week.phase}</span>
+                <span class="week-focus">${week.focus}</span>
+              </div>
+              <div class="week-hours"><span>${week.targetHours}</span> hrs</div>
+            </div>
+            <div class="days-grid">
+              ${fullWeek
+                .map((day) => {
+                  const isToday = day.date === today;
+                  const filteredWorkouts = day.workouts.filter((w) => filterWorkout(w));
+
+                  return `
+                  <div class="day-column ${isToday ? "today" : ""}">
+                    <div class="day-header">
+                      <span class="day-name">${day.dayOfWeek.slice(0, 3)}</span>
+                      <span class="day-date">${new Date(day.date).getDate()}</span>
+                    </div>
+                    ${
+                      filteredWorkouts.length > 0
+                        ? filteredWorkouts
+                            .map(
+                              (w) => `
+                      <div class="workout-card ${w.sport} ${w.completed ? "completed" : ""}"
+                           data-workout-id="${w.id}"
+                           onclick="openWorkoutModal('${w.id}')">
+                        <div class="workout-sport">${w.sport}</div>
+                        <div class="workout-name">${w.name}</div>
+                        ${w.durationMinutes ? `<div class="workout-duration">${formatDuration(w.durationMinutes)}</div>` : ""}
+                      </div>
+                    `
+                            )
+                            .join("")
+                        : day.workouts.length > 0 && filteredWorkouts.length === 0
+                          ? ""
+                          : '<div class="empty-day">Rest</div>'
+                    }
+                  </div>
+                `;
+                })
+                .join("")}
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      // Filter workout
+      function filterWorkout(workout) {
+        if (activeFilters.sport !== "all" && workout.sport !== activeFilters.sport) {
+          return false;
+        }
+        if (activeFilters.status === "completed" && !workout.completed) {
+          return false;
+        }
+        if (activeFilters.status === "pending" && workout.completed) {
+          return false;
+        }
+        return true;
+      }
+
+      // Find workout by ID
+      function findWorkout(id) {
+        for (const week of plan.weeks) {
+          for (const day of week.days) {
+            for (const workout of day.workouts) {
+              if (workout.id === id) {
+                return { workout, day, week };
+              }
+            }
+          }
+        }
+        return null;
+      }
+
+      // Open workout modal
+      function openWorkoutModal(workoutId) {
+        const found = findWorkout(workoutId);
+        if (!found) return;
+
+        currentWorkout = found;
+        const { workout, day } = found;
+
+        const modal = document.getElementById("modalOverlay");
+        document.getElementById("modalSport").textContent = workout.sport.toUpperCase();
+        document.getElementById("modalSport").className = `modal-sport-badge ${workout.sport}`;
+        document.getElementById("modalTitle").textContent = workout.name;
+        document.getElementById("modalDate").textContent = formatDate(day.date);
+
+        // Stats
+        const statsHtml = [];
+        if (workout.durationMinutes) {
+          statsHtml.push(
+            `<div class="modal-stat"><div class="modal-stat-value">${formatDuration(workout.durationMinutes)}</div><div class="modal-stat-label">Duration</div></div>`
+          );
+        }
+        if (workout.distanceMeters) {
+          const distStr = formatDistance(workout.distanceMeters, workout.sport);
+          statsHtml.push(
+            `<div class="modal-stat"><div class="modal-stat-value">${distStr}</div><div class="modal-stat-label">Distance</div></div>`
+          );
+        }
+        if (workout.primaryZone) {
+          const zoneInfo = getZoneInfo(workout.sport, workout.primaryZone);
+          statsHtml.push(
+            `<div class="modal-stat"><div class="modal-stat-value">${zoneInfo}</div><div class="modal-stat-label">Target Zone</div></div>`
+          );
+        }
+        document.getElementById("modalStats").innerHTML = statsHtml.join("");
+
+        document.getElementById("modalDescription").textContent = workout.description || "";
+
+        // Structure
+        const structureSection = document.getElementById("modalStructureSection");
+        if (workout.humanReadable) {
+          structureSection.style.display = "block";
+          document.getElementById("modalStructure").textContent = workout.humanReadable.replace(
+            /\\n/g,
+            "\n"
+          );
+        } else {
+          structureSection.style.display = "none";
+        }
+
+        // Complete button
+        updateCompleteButton(workout);
+
+        modal.classList.add("active");
+      }
+
+      // Update complete button
+      function updateCompleteButton(workout) {
+        const btn = document.getElementById("modalCompleteBtn");
+        if (workout.completed) {
+          btn.className = "complete-btn unmark";
+          btn.innerHTML = "<span>↩</span> Mark Incomplete";
+        } else {
+          btn.className = "complete-btn mark";
+          btn.innerHTML = "<span>✓</span> Mark Complete";
+        }
+      }
+
+      // Toggle workout completion
+      function toggleWorkoutComplete() {
+        if (!currentWorkout) return;
+
+        const { workout } = currentWorkout;
+        workout.completed = !workout.completed;
+
+        if (workout.completed) {
+          completedWorkouts[workout.id] = true;
+        } else {
+          delete completedWorkouts[workout.id];
+        }
+
+        saveCompleted();
+        updateCompleteButton(workout);
+        renderSidebar();
+        renderWeeks();
+      }
+
+      // Close modal
+      function closeModal() {
+        document.getElementById("modalOverlay").classList.remove("active");
+        currentWorkout = null;
+      }
+
+      // Open settings modal
+      function openSettingsModal() {
+        const overlay = document.getElementById("settingsOverlay");
+
+        // Populate general tab
+        document.getElementById("swimUnit").value = settings.units.swim;
+        document.getElementById("bikeUnit").value = settings.units.bike;
+        document.getElementById("runUnit").value = settings.units.run;
+        document.getElementById("firstDayOfWeek").value = settings.firstDayOfWeek;
+
+        // Populate run tab
+        document.getElementById("runLthr").value = settings.run.lthr;
+        renderHrZonesGrid("runHrZones", settings.run.hrZones, "run");
+        document.getElementById("runThresholdPace").value = settings.run.thresholdPace;
+        renderRunPaceZonesGrid("runPaceZones", settings.run.paceZones);
+
+        // Populate bike tab
+        document.getElementById("bikeLthr").value = settings.bike.lthr;
+        renderHrZonesGrid("bikeHrZones", settings.bike.hrZones, "bike");
+        document.getElementById("bikeFtp").value = settings.bike.ftp;
+        renderPowerZonesGrid("bikePowerZones", settings.bike.powerZones);
+
+        // Populate swim tab
+        document.getElementById("swimCss").value = settings.swim.css;
+        renderSwimPaceZonesGrid("swimPaceZones", settings.swim.paceZones);
+
+        overlay.classList.add("active");
+      }
+
+      // Close settings modal
+      function closeSettingsModal() {
+        document.getElementById("settingsOverlay").classList.remove("active");
+      }
+
+      // Setup settings event handlers
+      function setupSettings() {
+        const settingsBtn = document.getElementById("settingsBtn");
+        const settingsClose = document.getElementById("settingsClose");
+        const settingsOverlay = document.getElementById("settingsOverlay");
+
+        settingsBtn.addEventListener("click", openSettingsModal);
+        settingsClose.addEventListener("click", closeSettingsModal);
+        settingsOverlay.addEventListener("click", (e) => {
+          if (e.target.id === "settingsOverlay") closeSettingsModal();
+        });
+
+        // Tab switching
+        document.querySelectorAll(".settings-tab").forEach((tab) => {
+          tab.addEventListener("click", () => {
+            document.querySelectorAll(".settings-tab").forEach((t) => t.classList.remove("active"));
+            document
+              .querySelectorAll(".settings-tab-content")
+              .forEach((c) => c.classList.remove("active"));
+            tab.classList.add("active");
+            document.getElementById(`tab-${tab.dataset.tab}`).classList.add("active");
+          });
+        });
+
+        // Unit changes
+        ["swimUnit", "bikeUnit", "runUnit"].forEach((id) => {
+          document.getElementById(id).addEventListener("change", (e) => {
+            const sport = id.replace("Unit", "");
+            settings.units[sport] = e.target.value;
+            saveSettings();
+            renderWeeks();
+          });
+        });
+
+        // First day of week
+        document.getElementById("firstDayOfWeek").addEventListener("change", (e) => {
+          settings.firstDayOfWeek = e.target.value;
+          saveSettings();
+          renderWeeks();
+        });
+
+        // Recalculate buttons
+        document.querySelectorAll(".recalc-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const sport = btn.dataset.sport;
+            const type = btn.dataset.type;
+
+            if (type === "hr") {
+              const lthr = parseInt(document.getElementById(`${sport}Lthr`).value);
+              if (lthr >= 100 && lthr <= 220) {
+                recalculateHrZones(sport, lthr);
+                renderHrZonesGrid(`${sport}HrZones`, settings[sport].hrZones, sport);
+                saveSettings();
+              }
+            } else if (type === "power" && sport === "bike") {
+              const ftp = parseInt(document.getElementById("bikeFtp").value);
+              if (ftp >= 50 && ftp <= 500) {
+                recalculatePowerZones(ftp);
+                renderPowerZonesGrid("bikePowerZones", settings.bike.powerZones);
+                saveSettings();
+              }
+            } else if (type === "pace" && sport === "run") {
+              const pace = document.getElementById("runThresholdPace").value;
+              if (pace.match(/^\d+:\d{2}$/)) {
+                recalculateRunPaceZones(pace);
+                renderRunPaceZonesGrid("runPaceZones", settings.run.paceZones);
+                saveSettings();
+              }
+            } else if (type === "pace" && sport === "swim") {
+              const css = document.getElementById("swimCss").value;
+              if (css.match(/^\d+:\d{2}$/)) {
+                recalculateSwimPaceZones(css);
+                renderSwimPaceZonesGrid("swimPaceZones", settings.swim.paceZones);
+                saveSettings();
+              }
+            }
+          });
+        });
+
+        // Zone input changes (delegated)
+        document.querySelector(".modal-body").addEventListener("change", (e) => {
+          if (e.target.classList.contains("zone-input")) {
+            const { sport, type, zone, bound } = e.target.dataset;
+            const val = parseInt(e.target.value);
+            if (type === "hr") {
+              settings[sport].hrZones[zone][bound] = val;
+            } else if (type === "power") {
+              settings.bike.powerZones[zone][bound] = val;
+            }
+            saveSettings();
+          } else if (e.target.classList.contains("pace-input")) {
+            const { sport, zone } = e.target.dataset;
+            if (sport === "run") {
+              settings.run.paceZones[zone].pace = e.target.value;
+            } else if (sport === "swim") {
+              settings.swim.paceZones[zone].pace = e.target.value;
+            }
+            saveSettings();
+          }
+        });
+      }
+
+      // Setup filters
+      function setupFilters() {
+        document.getElementById("sportFilters").addEventListener("click", (e) => {
+          if (e.target.classList.contains("filter-chip")) {
+            document
+              .querySelectorAll("#sportFilters .filter-chip")
+              .forEach((c) => c.classList.remove("active"));
+            e.target.classList.add("active");
+            activeFilters.sport = e.target.dataset.filter;
+            renderWeeks();
+          }
+        });
+
+        document.getElementById("statusFilters").addEventListener("click", (e) => {
+          if (e.target.classList.contains("filter-chip")) {
+            document
+              .querySelectorAll("#statusFilters .filter-chip")
+              .forEach((c) => c.classList.remove("active"));
+            e.target.classList.add("active");
+            activeFilters.status = e.target.dataset.filter;
+            renderWeeks();
+          }
+        });
+      }
+
+      // Mobile menu
+      function setupMobileMenu() {
+        const toggle = document.getElementById("menuToggle");
+        const sidebar = document.getElementById("sidebar");
+
+        toggle.addEventListener("click", () => {
+          sidebar.classList.toggle("open");
+        });
+
+        document.addEventListener("click", (e) => {
+          if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+            sidebar.classList.remove("open");
+          }
+        });
+      }
+
+      // Init
+      function init() {
+        loadPlan();
+        loadSettings();
+        renderSidebar();
+        renderPhaseTimeline();
+        renderWeeks();
+        setupFilters();
+        setupMobileMenu();
+        setupSettings();
+
+        // Modal events
+        document.getElementById("modalClose").addEventListener("click", closeModal);
+        document.getElementById("modalOverlay").addEventListener("click", (e) => {
+          if (e.target.id === "modalOverlay") closeModal();
+        });
+        document
+          .getElementById("modalCompleteBtn")
+          .addEventListener("click", toggleWorkoutComplete);
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            closeModal();
+            closeSettingsModal();
+          }
+        });
+      }
+
+      init();
+    </script>
+  </body>
+</html>

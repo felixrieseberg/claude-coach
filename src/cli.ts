@@ -12,57 +12,123 @@ import { execute } from "./db/client.js";
 import { getValidTokens } from "./strava/oauth.js";
 import { getAllActivities, getAthlete } from "./strava/api.js";
 import type { StravaActivity } from "./strava/types.js";
+import { readFileSync, writeFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-interface CliArgs {
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// ============================================================================
+// Argument Parsing
+// ============================================================================
+
+interface SyncArgs {
+  command: "sync";
   clientId?: string;
   clientSecret?: string;
   days?: number;
-  help?: boolean;
 }
 
+interface RenderArgs {
+  command: "render";
+  inputFile: string;
+  outputFile?: string;
+}
+
+interface HelpArgs {
+  command: "help";
+}
+
+type CliArgs = SyncArgs | RenderArgs | HelpArgs;
+
 function parseArgs(): CliArgs {
-  const args: CliArgs = {};
+  const args = process.argv.slice(2);
 
-  for (let i = 2; i < process.argv.length; i++) {
-    const arg = process.argv[i];
+  if (args.length === 0 || args[0] === "sync") {
+    // Sync command (default)
+    const syncArgs: SyncArgs = { command: "sync" };
 
-    if (arg === "--help" || arg === "-h") {
-      args.help = true;
-    } else if (arg.startsWith("--client-id=")) {
-      args.clientId = arg.split("=")[1];
-    } else if (arg.startsWith("--client-secret=")) {
-      args.clientSecret = arg.split("=")[1];
-    } else if (arg.startsWith("--days=")) {
-      args.days = parseInt(arg.split("=")[1]);
+    for (const arg of args) {
+      if (arg.startsWith("--client-id=")) {
+        syncArgs.clientId = arg.split("=")[1];
+      } else if (arg.startsWith("--client-secret=")) {
+        syncArgs.clientSecret = arg.split("=")[1];
+      } else if (arg.startsWith("--days=")) {
+        syncArgs.days = parseInt(arg.split("=")[1]);
+      }
     }
+
+    return syncArgs;
   }
 
-  return args;
+  if (args[0] === "render") {
+    if (!args[1]) {
+      log.error("render command requires an input file");
+      process.exit(1);
+    }
+
+    const renderArgs: RenderArgs = {
+      command: "render",
+      inputFile: args[1],
+    };
+
+    for (let i = 2; i < args.length; i++) {
+      if (args[i] === "--output" || args[i] === "-o") {
+        renderArgs.outputFile = args[i + 1];
+        i++;
+      } else if (args[i].startsWith("--output=")) {
+        renderArgs.outputFile = args[i].split("=")[1];
+      }
+    }
+
+    return renderArgs;
+  }
+
+  if (args[0] === "--help" || args[0] === "-h" || args[0] === "help") {
+    return { command: "help" };
+  }
+
+  log.error(`Unknown command: ${args[0]}`);
+  process.exit(1);
 }
 
 function printHelp(): void {
   console.log(`
-Claude Coach - Strava Sync
+Claude Coach - Training Plan Tools
 
-Usage: npx claude-coach [options]
+Usage: npx claude-coach <command> [options]
 
-Options:
+Commands:
+  sync              Sync activities from Strava (default)
+  render <file>     Render a training plan JSON to HTML
+  help              Show this help message
+
+Sync Options:
   --client-id=ID        Strava API client ID
   --client-secret=SEC   Strava API client secret
   --days=N              Days of history to sync (default: 730)
-  --help, -h            Show this help message
+
+Render Options:
+  --output, -o FILE     Output HTML file (default: <input>.html)
 
 Examples:
-  # Interactive mode (prompts for credentials)
+  # Sync from Strava (interactive)
   npx claude-coach
 
-  # Non-interactive mode (for automation/Claude)
-  npx claude-coach --client-id=12345 --client-secret=abc123 --days=730
+  # Sync with credentials
+  npx claude-coach sync --client-id=12345 --client-secret=abc123
 
-Note: On first run, you'll need to authorize in the browser.
-After that, tokens are cached and subsequent syncs are automatic.
+  # Render a training plan to HTML
+  npx claude-coach render plan.json --output my-plan.html
+
+  # Render to stdout
+  npx claude-coach render plan.json
 `);
 }
+
+// ============================================================================
+// Sync Command
+// ============================================================================
 
 function escapeString(str: string | null | undefined): string {
   if (str == null) return "NULL";
@@ -130,19 +196,11 @@ function insertAthlete(athlete: {
   execute(sql);
 }
 
-async function main() {
-  const args = parseArgs();
-
-  if (args.help) {
-    printHelp();
-    process.exit(0);
-  }
-
+async function runSync(args: SyncArgs): Promise<void> {
   log.box("Claude Coach - Strava Sync");
 
   // Step 1: Check/create config
   if (!configExists()) {
-    // Check if credentials provided via CLI args
     if (args.clientId && args.clientSecret) {
       log.info("Creating configuration from command line arguments...");
       const config = createConfig(args.clientId, args.clientSecret, args.days || 730);
@@ -157,8 +215,6 @@ async function main() {
   }
 
   const config = loadConfig();
-
-  // Override sync_days if provided via CLI
   const syncDays = args.days || config.sync_days || 730;
 
   // Step 2: Initialize database
@@ -200,6 +256,89 @@ async function main() {
 
   log.info(`Database: ${getDbPath()}`);
   log.ready(`Query with: sqlite3 -json "${getDbPath()}" "SELECT * FROM weekly_volume"`);
+}
+
+// ============================================================================
+// Render Command
+// ============================================================================
+
+function getTemplatePath(): string {
+  // Look for template in multiple locations
+  const locations = [
+    join(__dirname, "..", "templates", "plan-viewer.html"),
+    join(__dirname, "..", "..", "templates", "plan-viewer.html"),
+    join(process.cwd(), "templates", "plan-viewer.html"),
+  ];
+
+  for (const loc of locations) {
+    try {
+      readFileSync(loc);
+      return loc;
+    } catch {
+      // Continue to next location
+    }
+  }
+
+  throw new Error("Could not find plan-viewer.html template");
+}
+
+function runRender(args: RenderArgs): void {
+  log.start("Rendering training plan...");
+
+  // Read the plan JSON
+  let planJson: string;
+  try {
+    planJson = readFileSync(args.inputFile, "utf-8");
+  } catch (err) {
+    log.error(`Could not read input file: ${args.inputFile}`);
+    process.exit(1);
+  }
+
+  // Validate it's valid JSON
+  try {
+    JSON.parse(planJson);
+  } catch (err) {
+    log.error("Input file is not valid JSON");
+    process.exit(1);
+  }
+
+  // Read the template
+  const templatePath = getTemplatePath();
+  let template = readFileSync(templatePath, "utf-8");
+
+  // Replace the plan data in the template
+  const planDataRegex = /<script type="application\/json" id="plan-data">[\s\S]*?<\/script>/;
+  const newPlanData = `<script type="application/json" id="plan-data">\n${planJson}\n</script>`;
+  template = template.replace(planDataRegex, newPlanData);
+
+  // Output
+  if (args.outputFile) {
+    writeFileSync(args.outputFile, template);
+    log.success(`Training plan rendered to: ${args.outputFile}`);
+  } else {
+    // Output to stdout
+    console.log(template);
+  }
+}
+
+// ============================================================================
+// Main
+// ============================================================================
+
+async function main() {
+  const args = parseArgs();
+
+  switch (args.command) {
+    case "help":
+      printHelp();
+      break;
+    case "sync":
+      await runSync(args);
+      break;
+    case "render":
+      runRender(args);
+      break;
+  }
 }
 
 main().catch((err) => {

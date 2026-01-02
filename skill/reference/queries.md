@@ -134,6 +134,64 @@ WHERE start_date >= date('now', '-2 years')
 GROUP BY sport_type;
 ```
 
+## Schedule Preferences
+
+```sql
+-- Preferred days for long rides (>90 min)
+-- Day mapping: 0=Sunday, 1=Monday, ..., 6=Saturday
+SELECT
+  CASE strftime('%w', start_date)
+    WHEN '0' THEN 'Sunday'
+    WHEN '1' THEN 'Monday'
+    WHEN '2' THEN 'Tuesday'
+    WHEN '3' THEN 'Wednesday'
+    WHEN '4' THEN 'Thursday'
+    WHEN '5' THEN 'Friday'
+    WHEN '6' THEN 'Saturday'
+  END AS day_name,
+  COUNT(*) AS long_rides
+FROM activities
+WHERE sport_type = 'Ride'
+  AND moving_time > 5400
+GROUP BY strftime('%w', start_date)
+ORDER BY long_rides DESC;
+
+-- Preferred days for long runs (>60 min)
+SELECT
+  CASE strftime('%w', start_date)
+    WHEN '0' THEN 'Sunday'
+    WHEN '1' THEN 'Monday'
+    WHEN '2' THEN 'Tuesday'
+    WHEN '3' THEN 'Wednesday'
+    WHEN '4' THEN 'Thursday'
+    WHEN '5' THEN 'Friday'
+    WHEN '6' THEN 'Saturday'
+  END AS day_name,
+  COUNT(*) AS long_runs
+FROM activities
+WHERE sport_type IN ('Run', 'Trail Run')
+  AND moving_time > 3600
+GROUP BY strftime('%w', start_date)
+ORDER BY long_runs DESC;
+
+-- Preferred days for swim sessions
+SELECT
+  CASE strftime('%w', start_date)
+    WHEN '0' THEN 'Sunday'
+    WHEN '1' THEN 'Monday'
+    WHEN '2' THEN 'Tuesday'
+    WHEN '3' THEN 'Wednesday'
+    WHEN '4' THEN 'Thursday'
+    WHEN '5' THEN 'Friday'
+    WHEN '6' THEN 'Saturday'
+  END AS day_name,
+  COUNT(*) AS swim_sessions
+FROM activities
+WHERE sport_type = 'Swim'
+GROUP BY strftime('%w', start_date)
+ORDER BY swim_sessions DESC;
+```
+
 ## HR / Zone Data
 
 ```sql

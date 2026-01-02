@@ -1,0 +1,507 @@
+{
+  "version": "1.0",
+  "meta": {
+    "id": "sample-plan-001",
+    "athlete": "Demo Athlete",
+    "event": "Ironman 70.3 Demo",
+    "eventDate": "2026-06-15",
+    "planStartDate": "2026-01-06",
+    "planEndDate": "2026-06-14",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z",
+    "totalWeeks": 23,
+    "generatedBy": "Claude Coach"
+  },
+  "preferences": {
+    "swim": "meters",
+    "bike": "kilometers",
+    "run": "kilometers",
+    "firstDayOfWeek": "monday"
+  },
+  "assessment": {
+    "foundation": {
+      "raceHistory": ["Olympic Tri 2025", "Half Marathon 2024"],
+      "peakTrainingLoad": 10,
+      "foundationLevel": "intermediate",
+      "yearsInSport": 3
+    },
+    "currentForm": {
+      "weeklyVolume": { "total": 6, "swim": 1, "bike": 3, "run": 2 },
+      "longestSessions": { "swim": 2000, "bike": 60, "run": 15 },
+      "consistency": 4
+    },
+    "strengths": [{ "sport": "run", "evidence": "Consistent pace, good form" }],
+    "limiters": [{ "sport": "swim", "evidence": "Limited pool access, needs technique work" }],
+    "constraints": ["Work Mon-Fri 9-5", "Pool only available weekday mornings"]
+  },
+  "zones": {
+    "run": {
+      "hr": {
+        "lthr": 170,
+        "zones": [
+          {
+            "zone": 1,
+            "name": "Recovery",
+            "percentLow": 0,
+            "percentHigh": 81,
+            "hrLow": 0,
+            "hrHigh": 138
+          },
+          {
+            "zone": 2,
+            "name": "Aerobic",
+            "percentLow": 81,
+            "percentHigh": 89,
+            "hrLow": 138,
+            "hrHigh": 151
+          },
+          {
+            "zone": 3,
+            "name": "Tempo",
+            "percentLow": 89,
+            "percentHigh": 94,
+            "hrLow": 151,
+            "hrHigh": 160
+          },
+          {
+            "zone": 4,
+            "name": "Threshold",
+            "percentLow": 94,
+            "percentHigh": 100,
+            "hrLow": 160,
+            "hrHigh": 170
+          },
+          {
+            "zone": 5,
+            "name": "VO2max",
+            "percentLow": 100,
+            "percentHigh": 106,
+            "hrLow": 170,
+            "hrHigh": 180
+          }
+        ]
+      }
+    },
+    "bike": {
+      "power": {
+        "ftp": 220,
+        "zones": [
+          {
+            "zone": 1,
+            "name": "Active Recovery",
+            "percentLow": 0,
+            "percentHigh": 55,
+            "wattsLow": 0,
+            "wattsHigh": 121
+          },
+          {
+            "zone": 2,
+            "name": "Endurance",
+            "percentLow": 55,
+            "percentHigh": 75,
+            "wattsLow": 121,
+            "wattsHigh": 165
+          },
+          {
+            "zone": 3,
+            "name": "Tempo",
+            "percentLow": 75,
+            "percentHigh": 90,
+            "wattsLow": 165,
+            "wattsHigh": 198
+          },
+          {
+            "zone": 4,
+            "name": "Threshold",
+            "percentLow": 90,
+            "percentHigh": 105,
+            "wattsLow": 198,
+            "wattsHigh": 231
+          },
+          {
+            "zone": 5,
+            "name": "VO2max",
+            "percentLow": 105,
+            "percentHigh": 120,
+            "wattsLow": 231,
+            "wattsHigh": 264
+          }
+        ]
+      }
+    },
+    "swim": {
+      "css": "1:50/100m",
+      "cssSeconds": 110,
+      "zones": [
+        { "zone": 1, "name": "Recovery", "paceOffset": 20, "pace": "2:10/100m" },
+        { "zone": 2, "name": "Endurance", "paceOffset": 10, "pace": "2:00/100m" },
+        { "zone": 3, "name": "Threshold", "paceOffset": 0, "pace": "1:50/100m" },
+        { "zone": 4, "name": "VO2max", "paceOffset": -5, "pace": "1:45/100m" }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Base",
+      "startWeek": 1,
+      "endWeek": 8,
+      "focus": "Build aerobic foundation and consistency",
+      "weeklyHoursRange": { "low": 6, "high": 9 },
+      "keyWorkouts": ["Long ride", "Long run", "Swim technique"],
+      "physiologicalGoals": ["Improve fat oxidation", "Build aerobic base", "Establish routine"]
+    },
+    {
+      "name": "Build",
+      "startWeek": 9,
+      "endWeek": 18,
+      "focus": "Increase intensity and race-specific fitness",
+      "weeklyHoursRange": { "low": 8, "high": 12 },
+      "keyWorkouts": ["Tempo runs", "Sweet spot rides", "Open water swims"],
+      "physiologicalGoals": ["Raise lactate threshold", "Build muscular endurance"]
+    },
+    {
+      "name": "Peak",
+      "startWeek": 19,
+      "endWeek": 21,
+      "focus": "Race simulation and final sharpening",
+      "weeklyHoursRange": { "low": 10, "high": 12 },
+      "keyWorkouts": ["Race pace efforts", "Brick workouts"],
+      "physiologicalGoals": ["Peak fitness", "Race confidence"]
+    },
+    {
+      "name": "Taper",
+      "startWeek": 22,
+      "endWeek": 23,
+      "focus": "Rest and race preparation",
+      "weeklyHoursRange": { "low": 4, "high": 6 },
+      "keyWorkouts": ["Short openers", "Easy maintenance"],
+      "physiologicalGoals": ["Full recovery", "Mental preparation"]
+    }
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "startDate": "2026-01-05",
+      "endDate": "2026-01-11",
+      "phase": "Base",
+      "focus": "Establish routine, easy introduction",
+      "targetHours": 6,
+      "isRecoveryWeek": false,
+      "days": [
+        {
+          "date": "2026-01-05",
+          "dayOfWeek": "Monday",
+          "workouts": [
+            {
+              "id": "w1-mon-rest",
+              "sport": "rest",
+              "type": "rest",
+              "name": "Rest Day",
+              "description": "Complete rest or light stretching",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-06",
+          "dayOfWeek": "Tuesday",
+          "workouts": [
+            {
+              "id": "w1-tue-swim",
+              "sport": "swim",
+              "type": "technique",
+              "name": "Technique Focus",
+              "description": "Drill-focused session to improve catch and body position",
+              "durationMinutes": 45,
+              "distanceMeters": 1800,
+              "primaryZone": "Zone 2",
+              "humanReadable": "Warm-up: 200m easy\nDrills: 4x50m (catch-up, fingertip drag, fist, swim)\nMain: 4x100m @ Zone 2 with 15s rest\nPull: 400m with buoy, focus on rotation\nCool-down: 200m easy",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-07",
+          "dayOfWeek": "Wednesday",
+          "workouts": [
+            {
+              "id": "w1-wed-run",
+              "sport": "run",
+              "type": "endurance",
+              "name": "Easy Run",
+              "description": "Conversational pace, focus on form",
+              "durationMinutes": 40,
+              "distanceMeters": 6000,
+              "primaryZone": "Zone 2",
+              "rpe": 4,
+              "humanReadable": "40min easy running\nKeep HR in Zone 2\nFocus on cadence (180 spm target)",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-08",
+          "dayOfWeek": "Thursday",
+          "workouts": [
+            {
+              "id": "w1-thu-bike",
+              "sport": "bike",
+              "type": "endurance",
+              "name": "Aerobic Ride",
+              "description": "Steady endurance pace on trainer or road",
+              "durationMinutes": 60,
+              "distanceMeters": 25000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "60min steady riding\nPower: 55-75% FTP (121-165W)\nCadence: 85-95 rpm",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-09",
+          "dayOfWeek": "Friday",
+          "workouts": [
+            {
+              "id": "w1-fri-swim",
+              "sport": "swim",
+              "type": "endurance",
+              "name": "Aerobic Swim",
+              "description": "Build aerobic capacity with continuous swimming",
+              "durationMinutes": 45,
+              "distanceMeters": 2000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "Warm-up: 300m easy\nMain: 1000m continuous @ Zone 2\nPull: 400m easy with paddles\nCool-down: 300m choice",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-10",
+          "dayOfWeek": "Saturday",
+          "workouts": [
+            {
+              "id": "w1-sat-bike",
+              "sport": "bike",
+              "type": "long",
+              "name": "Long Ride",
+              "description": "Build aerobic endurance with a longer effort",
+              "durationMinutes": 90,
+              "distanceMeters": 40000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "90min long ride\nMostly Zone 2, occasional Zone 3 on hills\nPractice nutrition: 60g carbs/hour",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-11",
+          "dayOfWeek": "Sunday",
+          "workouts": [
+            {
+              "id": "w1-sun-run",
+              "sport": "run",
+              "type": "long",
+              "name": "Long Run",
+              "description": "Easy pace, focus on time on feet",
+              "durationMinutes": 60,
+              "distanceMeters": 10000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "60min easy running\nConversational pace throughout\nWalk breaks are OK if needed",
+              "completed": false
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "totalHours": 6,
+        "bySport": {
+          "swim": { "sessions": 2, "hours": 1.5, "km": 3.8 },
+          "bike": { "sessions": 2, "hours": 2.5, "km": 65 },
+          "run": { "sessions": 2, "hours": 1.67, "km": 16 }
+        }
+      }
+    },
+    {
+      "weekNumber": 2,
+      "startDate": "2026-01-12",
+      "endDate": "2026-01-18",
+      "phase": "Base",
+      "focus": "Build consistency, slight volume increase",
+      "targetHours": 7,
+      "isRecoveryWeek": false,
+      "days": [
+        {
+          "date": "2026-01-12",
+          "dayOfWeek": "Monday",
+          "workouts": [
+            {
+              "id": "w2-mon-rest",
+              "sport": "rest",
+              "type": "rest",
+              "name": "Rest Day",
+              "description": "Complete rest",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-13",
+          "dayOfWeek": "Tuesday",
+          "workouts": [
+            {
+              "id": "w2-tue-swim",
+              "sport": "swim",
+              "type": "technique",
+              "name": "Drill + Threshold",
+              "description": "Technical work with some threshold efforts",
+              "durationMinutes": 50,
+              "distanceMeters": 2200,
+              "primaryZone": "Zone 2-3",
+              "humanReadable": "Warm-up: 300m easy\nDrills: 4x50m technique\nMain: 5x100m @ CSS pace, 15s rest\nPull: 600m steady\nCool-down: 200m easy",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-14",
+          "dayOfWeek": "Wednesday",
+          "workouts": [
+            {
+              "id": "w2-wed-run",
+              "sport": "run",
+              "type": "endurance",
+              "name": "Easy Run + Strides",
+              "description": "Easy aerobic run with strides for neuromuscular activation",
+              "durationMinutes": 45,
+              "distanceMeters": 7000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "35min easy running\n6x20s strides with full recovery\n5min cool-down jog",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-15",
+          "dayOfWeek": "Thursday",
+          "workouts": [
+            {
+              "id": "w2-thu-bike",
+              "sport": "bike",
+              "type": "endurance",
+              "name": "Aerobic + Cadence",
+              "description": "Endurance ride with cadence drills",
+              "durationMinutes": 70,
+              "distanceMeters": 30000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "70min with cadence work\n10min warm-up\n5x3min high cadence (100+ rpm)\n5min easy between\n15min cool-down",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-16",
+          "dayOfWeek": "Friday",
+          "workouts": [
+            {
+              "id": "w2-fri-swim",
+              "sport": "swim",
+              "type": "endurance",
+              "name": "Continuous Aerobic",
+              "description": "Build aerobic endurance with sustained effort",
+              "durationMinutes": 50,
+              "distanceMeters": 2400,
+              "primaryZone": "Zone 2",
+              "humanReadable": "Warm-up: 400m easy\nMain: 1500m continuous @ Zone 2\nCool-down: 500m mixed stroke",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-17",
+          "dayOfWeek": "Saturday",
+          "workouts": [
+            {
+              "id": "w2-sat-bike",
+              "sport": "bike",
+              "type": "long",
+              "name": "Long Ride",
+              "description": "Extended aerobic ride",
+              "durationMinutes": 105,
+              "distanceMeters": 50000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "1:45 long ride\nSteady Zone 2 effort\nFuel with 60-80g carbs/hour",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2026-01-18",
+          "dayOfWeek": "Sunday",
+          "workouts": [
+            {
+              "id": "w2-sun-run",
+              "sport": "run",
+              "type": "long",
+              "name": "Long Run",
+              "description": "Progressive long run",
+              "durationMinutes": 70,
+              "distanceMeters": 12000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "70min long run\nFirst 50min easy Zone 2\nLast 20min at high Zone 2",
+              "completed": false
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "totalHours": 7,
+        "bySport": {
+          "swim": { "sessions": 2, "hours": 1.67, "km": 4.6 },
+          "bike": { "sessions": 2, "hours": 2.92, "km": 80 },
+          "run": { "sessions": 2, "hours": 1.92, "km": 19 }
+        }
+      }
+    }
+  ],
+  "raceStrategy": {
+    "event": {
+      "name": "Ironman 70.3 Demo",
+      "date": "2026-06-15",
+      "type": "70.3",
+      "distances": { "swim": 1900, "bike": 90, "run": 21.1 }
+    },
+    "pacing": {
+      "swim": { "target": "1:55/100m", "notes": "Sight every 6-8 strokes, draft if possible" },
+      "bike": {
+        "targetPower": "165-175W (75-80% FTP)",
+        "targetHR": "<150",
+        "notes": "Negative split, save legs for run"
+      },
+      "run": {
+        "targetPace": "5:30-5:45/km",
+        "targetHR": "<160",
+        "notes": "Walk aid stations, ice and water"
+      }
+    },
+    "nutrition": {
+      "preRace": "3 hours before: 100g carbs (oatmeal, banana, toast). 1 hour before: 30g carbs (gel or sports drink)",
+      "during": {
+        "carbsPerHour": 70,
+        "fluidPerHour": "600-800ml",
+        "products": ["Maurten Gel 100", "Maurten 320 mix", "Coca-Cola on run"]
+      },
+      "notes": "Practice this exact nutrition in long training sessions"
+    },
+    "taper": {
+      "startDate": "2026-06-01",
+      "volumeReduction": 50,
+      "notes": "Maintain 2-3 short intensity sessions. Focus on sleep and nutrition."
+    },
+    "raceDay": {
+      "wakeUpTime": "4:00 AM",
+      "preRaceMeal": "4:30 AM - Oatmeal with banana and honey",
+      "warmUp": "10min easy swim 15min before start",
+      "mentalCues": ["Smooth is fast", "Run your own race", "Smile at mile 10"]
+    }
+  }
+}

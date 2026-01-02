@@ -34,17 +34,55 @@ Divide the training period into phases:
 
 ## Microcycle Structure (Weekly)
 
-Standard week template:
+### Principles (more important than specific days)
 
-| Day       | Focus                 | Notes                             |
-| --------- | --------------------- | --------------------------------- |
-| Monday    | Rest or easy recovery | Active recovery swim/spin OK      |
-| Tuesday   | Quality session #1    | Intervals, tempo, speed work      |
-| Wednesday | Moderate aerobic      | Steady-state, technique focus     |
-| Thursday  | Quality session #2    | Different sport than Tuesday      |
-| Friday    | Rest or easy          | Pre-weekend recovery              |
-| Saturday  | Long session #1       | Primary endurance builder         |
-| Sunday    | Long session #2       | Secondary sport, or brick workout |
+1. **Separate hard days** - 48hr between quality sessions in the same sport
+2. **No same sport back-to-back** - Spread swim/bike/run across the week (no swim Mon + swim Tue)
+3. **Respect long session recovery** - Easy day after long rides/runs
+4. **Consistent weekly structure** - Same sports on same days each week helps athletes plan
+5. **Include doubles strategically** - AM/PM splits for time efficiency or brick practice
+
+### Sample Week Templates
+
+**Template A: Traditional (Mon rest)**
+| Day | Session 1 | Session 2 |
+|-----|-----------|-----------|
+| Mon | Rest | - |
+| Tue | Swim (quality) | - |
+| Wed | Bike (easy) | Strength |
+| Thu | Run (quality) | - |
+| Fri | Swim (easy) | - |
+| Sat | Bike (long) | Run (brick, easy) |
+| Sun | Run (long) | - |
+
+**Template B: Weekend Warrior (busy weekdays)**
+| Day | Session 1 | Session 2 |
+|-----|-----------|-----------|
+| Mon | Rest | - |
+| Tue | Swim (AM, 45min) | Run (PM, easy) |
+| Wed | Bike (trainer, 60min) | - |
+| Thu | Swim (AM, 45min) | Strength (PM) |
+| Fri | Rest | - |
+| Sat | Bike (long, outdoor) | - |
+| Sun | Run (long) | Swim (easy, PM) |
+
+**Template C: 70.3 Build Phase**
+| Day | Session 1 | Session 2 |
+|-----|-----------|-----------|
+| Mon | Easy swim or rest | - |
+| Tue | Bike (sweet spot) | - |
+| Wed | Run (tempo) | Strength |
+| Thu | Swim (threshold) | - |
+| Fri | Rest or easy spin | - |
+| Sat | Bike (long) | Run (brick) |
+| Sun | Run (long) | - |
+
+### Avoid These Patterns
+
+- ❌ Same sport on consecutive days (swim Mon + swim Tue, run Thu + run Fri)
+- ❌ Quality run day after long ride (insufficient recovery)
+- ❌ Two threshold sessions in same sport within 48hr
+- ❌ Long sessions back-to-back without one being easy
 
 ---
 

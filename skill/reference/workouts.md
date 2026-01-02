@@ -177,6 +177,107 @@ Great for teaching pace discipline and finishing strong
 
 ---
 
+## Strength Training
+
+Strength work is essential for injury prevention, power development, and late-race durability. Include 1-2 sessions per week.
+
+### Workout Types
+
+| Session Type | Structure                          | When to Use            |
+| ------------ | ---------------------------------- | ---------------------- |
+| Foundation   | 2-3 sets x 12-15 reps, bodyweight  | Base phase, beginners  |
+| Strength     | 3-4 sets x 6-8 reps, moderate load | Build phase, 1-2x/week |
+| Power        | 3-4 sets x 4-6 reps, explosive     | Peak phase, 1x/week    |
+| Maintenance  | 2 sets x 8-10 reps, light          | Race week, taper       |
+
+### Core Exercises (Every Session)
+
+```
+Plank: 3 x 45-60s
+Side plank: 2 x 30s each side
+Dead bug: 2 x 12 each side
+Bird dog: 2 x 10 each side
+```
+
+### Triathlete-Specific Exercises
+
+| Focus        | Exercises                                    | Why                               |
+| ------------ | -------------------------------------------- | --------------------------------- |
+| Swim power   | Lat pulldown, pull-ups, band pull-aparts     | Catch strength, stroke power      |
+| Bike power   | Squats, leg press, step-ups, single-leg work | Pedaling force, hill climbing     |
+| Run strength | Lunges, Romanian deadlifts, calf raises      | Push-off power, injury prevention |
+| Stability    | Single-leg squats, BOSU work, hip circles    | Balance, proprioception           |
+
+### Sample Session (45min)
+
+```
+Warm-up: 5min light cardio, dynamic stretches
+Circuit 1 (3 rounds):
+  - Goblet squats x 10
+  - Push-ups x 12
+  - Single-leg Romanian deadlift x 8 each
+Circuit 2 (3 rounds):
+  - Lat pulldown x 10
+  - Step-ups x 10 each leg
+  - Plank x 45s
+Cool-down: 5min stretching
+```
+
+### Timing Considerations
+
+- **Before endurance**: Light activation only (bands, bodyweight)
+- **After easy sessions**: Full strength OK
+- **Separate from key workouts**: 6+ hours apart, or different days
+- **Taper**: Reduce to maintenance (2 sets, lighter weight)
+
+---
+
+## Multiple Workouts Per Day (Doubles)
+
+Doubling up sessions is common in triathlon. Guidelines:
+
+### When to Use Doubles
+
+| Scenario                | Example                    | Notes                        |
+| ----------------------- | -------------------------- | ---------------------------- |
+| Brick workouts          | Bike → Run                 | Race simulation, transition  |
+| Time-efficient training | AM swim + PM run           | Separate by 6+ hours ideally |
+| High-volume phases      | Easy swim AM + bike PM     | Keep one session easy        |
+| Strength + cardio       | AM strength + PM easy ride | Strength first when fresh    |
+
+### Rules for Doubles
+
+1. **Never two quality sessions on the same day** - One hard, one easy
+2. **Separate key sessions** - 6+ hours between, or easy/hard split
+3. **Fuel between sessions** - Carbs and protein within 30min of first session
+4. **Sleep matters more** - Skip the double if sleep-deprived
+5. **Consider weekly load** - Doubles add stress; reduce elsewhere if needed
+
+### Sample Double Days
+
+**Triathlon Build Phase:**
+
+```
+AM: 45min technique swim (easy)
+PM: 90min bike with sweet spot intervals (quality)
+```
+
+**Weekend Long Day:**
+
+```
+AM: 3hr long ride (quality)
+PM: 30min easy transition run (easy)
+```
+
+**Time-Crunched Weekday:**
+
+```
+Lunch: 30min strength (moderate)
+PM: 60min easy run (easy)
+```
+
+---
+
 ## Session Intensity Distribution (Polarized Model)
 
 For endurance events, 80% of volume should be easy (Zone 1-2), 20% hard (Zone 4+). Avoid excessive Zone 3 "gray zone" training.

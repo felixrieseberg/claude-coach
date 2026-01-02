@@ -12,7 +12,11 @@
     "test": "vitest",
     "test:run": "vitest run",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,json,md,html,css}": "prettier --write"
   },
   "dependencies": {
     "consola": "^3.2.3",
@@ -20,6 +24,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.4.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",

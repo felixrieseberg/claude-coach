@@ -81,6 +81,38 @@ _"The athlete's swim data shows 5000m sessions at avg HR 125 with suffer_score o
 
 8. **Preferences**: _"Are there workouts you love or hate? Sports you'd rather emphasize?"_
 
+9. **Long session scheduling**: _"Which days work best for your long ride and long run? I see from your data you typically do long rides on [day]."_ (Check their historical patterns first—look for rides >2hr and runs >1hr to infer preferred days)
+
+### Inferring Long Session Preferences
+
+Before asking, analyze their Strava data to identify patterns:
+
+```sql
+-- Find preferred days for long rides (>90 min)
+SELECT
+  strftime('%w', start_date) as day_of_week,
+  COUNT(*) as count
+FROM activities
+WHERE sport_type = 'Ride'
+  AND moving_time > 5400
+GROUP BY day_of_week
+ORDER BY count DESC;
+
+-- Find preferred days for long runs (>60 min)
+SELECT
+  strftime('%w', start_date) as day_of_week,
+  COUNT(*) as count
+FROM activities
+WHERE sport_type IN ('Run', 'Trail Run')
+  AND moving_time > 3600
+GROUP BY day_of_week
+ORDER BY count DESC;
+```
+
+Day mapping: 0=Sunday, 1=Monday, ..., 6=Saturday
+
+Use this data to make an informed suggestion: _"I notice you typically do your long rides on Saturday and long runs on Sunday. Should we keep that pattern?"_
+
 ### Example Dialogue
 
 ```

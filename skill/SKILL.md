@@ -146,103 +146,243 @@ Read these files as needed during plan creation:
 ### Phase 5: Plan Delivery
 
 11. Read `skill/reference/race-day.md` for race execution section
-12. Write the plan to a file (see output format below)
+12. Write the plan as JSON, then render to HTML (see output format below)
 
 ---
 
 ## Plan Output Format
 
-**IMPORTANT: Write the training plan to a file, do not just output it to chat.**
+**IMPORTANT: Output the training plan as structured JSON, then render to HTML.**
 
-Create a markdown file in the current working directory: `{event-name}-{date}.md`
+### Step 1: Write JSON Plan
 
-Example: `ironman-703-oceanside-2026-03-29.md`
+Create a JSON file: `{event-name}-{date}.json`
 
-Use the Write tool to create this file with this structure:
+Example: `ironman-703-oceanside-2026-03-29.json`
 
-```markdown
-# Training Plan: [Event Name]
+The JSON must follow the TrainingPlan schema.
 
-**Athlete**: [Name from database]
-**Event Date**: [Date]
-**Weeks Until Event**: [N]
+**Inferring Unit Preferences:**
 
-## Athlete Assessment
+Determine the athlete's preferred units from their Strava data and event location:
 
-**Athletic Foundation** (lifetime):
+| Indicator                                          | Likely Preference                            |
+| -------------------------------------------------- | -------------------------------------------- |
+| US-based events (Ironman Arizona, Boston Marathon) | Imperial: miles for bike/run, yards for swim |
+| European/Australian events                         | Metric: km for bike/run, meters for swim     |
+| Strava activities show distances in miles          | Imperial                                     |
+| Strava activities show distances in km             | Metric                                       |
+| Pool workouts in 25yd/50yd pools                   | Yards for swim                               |
+| Pool workouts in 25m/50m pools                     | Meters for swim                              |
 
-- Race history: [e.g., "Ironman 2024, 3x 70.3, 5+ years triathlon experience"]
-- Peak training load achieved: [X hours/week]
-- Foundation level: [Beginner / Intermediate / Advanced / Returning elite]
+When in doubt, ask the athlete during validation. Use round distances that make sense in the chosen unit system:
 
-**Current Form** (last 8-12 weeks):
+- Metric: 5km, 10km, 20km, 40km, 80km (not 8.05km)
+- Imperial: 3mi, 6mi, 12mi, 25mi, 50mi (not 4.97mi)
+- Meters: 100m, 200m, 400m, 1000m, 1500m
+- Yards: 100yd, 200yd, 500yd, 1000yd, 1650yd
 
-- Weekly volume: X hours (Swim: X, Bike: X, Run: X)
-- Longest recent sessions: Swim Xm, Bike Xkm, Run Xkm
-- Time since peak fitness: [X weeks/months]
+Here's the structure:
 
-**Strengths**: [Sport + evidence]
-**Limiters**: [Sport + evidence]
-**Athlete-Confirmed Constraints**: [Any constraints discussed]
-
-**Plan Approach**: [Strategy + progression rate]
-
----
-
-## Training Zones
-
-[Include personalized zones for each sport]
-
----
-
-## Phase Overview
-
-| Phase | Weeks | Focus | Weekly Hours |
-| ----- | ----- | ----- | ------------ |
-| Base  | 1-X   | ...   | X-X          |
-| Build | X-X   | ...   | X-X          |
-| Peak  | X-X   | ...   | X-X          |
-| Taper | X-X   | ...   | X-X          |
-
----
-
-## Week 1: [Phase Name]
-
-**Focus**: [Weekly focus]
-**Total Hours**: [Target]
-
-### Monday - Rest
-
-...
-
-### Tuesday - [Sport] ([Duration])
-
-**Type**: [Intervals/Tempo/Easy/etc.]
-[Detailed workout]
-**Target**: [HR zone, pace, power, or RPE]
-
-[Continue for each day...]
-
-### Week Summary
-
-| Sport | Sessions | Duration | Distance | Notes |
-| ----- | -------- | -------- | -------- | ----- |
-| ...   | ...      | ...      | ...      | ...   |
-
----
-
-## Week 2: ...
-
-[Continue for all weeks]
-
----
-
-## Race Execution Strategy
-
-[Pacing and nutrition plan]
+```json
+{
+  "version": "1.0",
+  "meta": {
+    "id": "unique-plan-id",
+    "athlete": "Athlete Name",
+    "event": "Ironman 70.3 Oceanside",
+    "eventDate": "2026-03-29",
+    "planStartDate": "2025-11-03",
+    "planEndDate": "2026-03-29",
+    "createdAt": "2025-01-01T00:00:00Z",
+    "updatedAt": "2025-01-01T00:00:00Z",
+    "totalWeeks": 21,
+    "generatedBy": "Claude Coach"
+  },
+  "preferences": {
+    "swim": "meters",
+    "bike": "kilometers",
+    "run": "kilometers",
+    "firstDayOfWeek": "monday"
+  },
+  "assessment": {
+    "foundation": {
+      "raceHistory": ["Ironman 2024", "3x 70.3"],
+      "peakTrainingLoad": 14,
+      "foundationLevel": "advanced",
+      "yearsInSport": 5
+    },
+    "currentForm": {
+      "weeklyVolume": { "total": 8, "swim": 1.5, "bike": 4, "run": 2.5 },
+      "longestSessions": { "swim": 3000, "bike": 80, "run": 18 },
+      "consistency": 5
+    },
+    "strengths": [{ "sport": "bike", "evidence": "Highest relative suffer score" }],
+    "limiters": [{ "sport": "swim", "evidence": "Lowest weekly volume" }],
+    "constraints": ["Work travel 2x/month", "Pool access only weekdays"]
+  },
+  "zones": {
+    "run": {
+      "hr": {
+        "lthr": 165,
+        "zones": [
+          {
+            "zone": 1,
+            "name": "Recovery",
+            "percentLow": 0,
+            "percentHigh": 81,
+            "hrLow": 0,
+            "hrHigh": 134
+          },
+          {
+            "zone": 2,
+            "name": "Aerobic",
+            "percentLow": 81,
+            "percentHigh": 89,
+            "hrLow": 134,
+            "hrHigh": 147
+          }
+        ]
+      }
+    },
+    "bike": {
+      "power": {
+        "ftp": 250,
+        "zones": [
+          {
+            "zone": 1,
+            "name": "Active Recovery",
+            "percentLow": 0,
+            "percentHigh": 55,
+            "wattsLow": 0,
+            "wattsHigh": 137
+          }
+        ]
+      }
+    },
+    "swim": {
+      "css": "1:45/100m",
+      "cssSeconds": 105,
+      "zones": [{ "zone": 1, "name": "Recovery", "paceOffset": 15, "pace": "2:00/100m" }]
+    }
+  },
+  "phases": [
+    {
+      "name": "Base",
+      "startWeek": 1,
+      "endWeek": 6,
+      "focus": "Aerobic foundation",
+      "weeklyHoursRange": { "low": 8, "high": 10 },
+      "keyWorkouts": ["Long ride", "Long run"],
+      "physiologicalGoals": ["Improve fat oxidation", "Build aerobic base"]
+    }
+  ],
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "startDate": "2025-11-03",
+      "endDate": "2025-11-09",
+      "phase": "Base",
+      "focus": "Establish routine",
+      "targetHours": 8,
+      "isRecoveryWeek": false,
+      "days": [
+        {
+          "date": "2025-11-03",
+          "dayOfWeek": "Monday",
+          "workouts": [
+            {
+              "id": "w1-mon-rest",
+              "sport": "rest",
+              "type": "rest",
+              "name": "Rest Day",
+              "description": "Full recovery",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2025-11-04",
+          "dayOfWeek": "Tuesday",
+          "workouts": [
+            {
+              "id": "w1-tue-swim",
+              "sport": "swim",
+              "type": "technique",
+              "name": "Technique + Aerobic",
+              "description": "Focus on catch mechanics with aerobic base",
+              "durationMinutes": 45,
+              "distanceMeters": 2000,
+              "primaryZone": "Zone 2",
+              "humanReadable": "Warm-up: 300m easy\nMain: 6x100m drill/swim, 800m pull\nCool-down: 200m easy",
+              "completed": false
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "totalHours": 8,
+        "bySport": {
+          "swim": { "sessions": 2, "hours": 1.5, "km": 5 },
+          "bike": { "sessions": 2, "hours": 4, "km": 100 },
+          "run": { "sessions": 3, "hours": 2.5, "km": 25 }
+        }
+      }
+    }
+  ],
+  "raceStrategy": {
+    "event": {
+      "name": "Ironman 70.3 Oceanside",
+      "date": "2026-03-29",
+      "type": "70.3",
+      "distances": { "swim": 1900, "bike": 90, "run": 21.1 }
+    },
+    "pacing": {
+      "swim": { "target": "1:50/100m", "notes": "Start conservative" },
+      "bike": { "targetPower": "180-190W", "targetHR": "<145", "notes": "Negative split" },
+      "run": { "targetPace": "5:15-5:30/km", "targetHR": "<155", "notes": "Walk aid stations" }
+    },
+    "nutrition": {
+      "preRace": "3 hours before: 100g carbs, low fiber",
+      "during": {
+        "carbsPerHour": 80,
+        "fluidPerHour": "750ml",
+        "products": ["Maurten 320", "Maurten Gel 100"]
+      },
+      "notes": "Test this in training"
+    },
+    "taper": {
+      "startDate": "2026-03-15",
+      "volumeReduction": 50,
+      "notes": "Maintain intensity, reduce volume"
+    }
+  }
+}
 ```
 
-**After generating the plan, use the Write tool to save it, then tell the user the file path.**
+### Step 2: Render to HTML
+
+After writing the JSON file, render it to an interactive HTML viewer:
+
+```bash
+npx claude-coach render plan.json --output plan.html
+```
+
+This creates a beautiful, interactive training plan with:
+
+- Calendar view with color-coded workouts by sport
+- Click workouts to see full details
+- Mark workouts as complete (saved to localStorage)
+- Week summaries with hours by sport
+- Dark mode, mobile responsive
+
+### Step 3: Tell the User
+
+After both files are created, tell the user:
+
+1. The JSON file path (for data)
+2. The HTML file path (for viewing)
+3. Suggest opening the HTML file in a browser
 
 ---
 
@@ -255,6 +395,9 @@ Use the Write tool to create this file with this structure:
 5. **Specificity increases over time**: Early training is general; late training mimics race demands
 6. **Taper adequately**: Most athletes under-taper; trust the fitness you've built
 7. **Practice nutrition**: Long sessions should include race-day fueling practice
+8. **Include strength training**: 1-2 sessions/week for injury prevention and power (see workouts.md)
+9. **Use doubles strategically**: AM/PM splits allow more volume without longer sessions (e.g., AM swim + PM run)
+10. **Never schedule same sport back-to-back**: Avoid swim Mon + swim Tue, or run Thu + run Fri—spread each sport across the week
 
 ---
 
@@ -263,5 +406,5 @@ Use the Write tool to create this file with this structure:
 - **Never skip athlete validation** - Present your assessment and get confirmation before writing the plan
 - **Distinguish foundation from form** - An Ironman finisher who took 3 months off is NOT the same as a beginner
 - **Zones must be established** before prescribing specific workouts
-- **Write to a file** - Do not just output the plan to chat
+- **Output JSON, then render HTML** - Write the plan as `.json`, then use `npx claude-coach render` to create the HTML viewer
 - **Explain the "why"** - Athletes trust and follow plans they understand
