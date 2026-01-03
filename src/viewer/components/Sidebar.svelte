@@ -2,6 +2,7 @@
   import type { TrainingPlan, Sport } from "../../schema/training-plan.js";
   import type { Settings } from "../stores/settings.js";
   import { formatEventDate, getDaysToEvent, getSportIcon } from "../lib/utils.js";
+  import { exportPlanToCalendar, exportAllWorkouts } from "../lib/export/index.js";
 
   interface Props {
     plan: TrainingPlan;
@@ -82,6 +83,48 @@
 
   function setStatusFilter(status: string) {
     onFilterChange({ ...filters, status });
+  }
+
+  // Export state
+  let showExportMenu = $state(false);
+  let exportStatus = $state<{ message: string; isError: boolean } | null>(null);
+
+  function handleExportCalendar() {
+    showExportMenu = false;
+    exportStatus = { message: "Exporting calendar...", isError: false };
+
+    const result = exportPlanToCalendar(plan);
+    if (result.success) {
+      exportStatus = { message: `Downloaded ${result.filename}`, isError: false };
+    } else {
+      exportStatus = { message: result.error || "Export failed", isError: true };
+    }
+
+    setTimeout(() => {
+      exportStatus = null;
+    }, 3000);
+  }
+
+  async function handleExportAllWorkouts(format: "zwo" | "fit") {
+    showExportMenu = false;
+    exportStatus = { message: `Exporting ${format.toUpperCase()} files...`, isError: false };
+
+    const result = await exportAllWorkouts(plan, format, settings);
+    if (result.errors.length === 0) {
+      exportStatus = {
+        message: `Exported ${result.exported} workouts (${result.skipped} skipped)`,
+        isError: false,
+      };
+    } else {
+      exportStatus = {
+        message: `Exported ${result.exported}, ${result.errors.length} errors`,
+        isError: true,
+      };
+    }
+
+    setTimeout(() => {
+      exportStatus = null;
+    }, 4000);
   }
 </script>
 
@@ -175,6 +218,56 @@
           {label}
         </button>
       {/each}
+    </div>
+  </div>
+
+  <div class="export-section">
+    <div class="export-header">
+      <h3>Export Plan</h3>
+      {#if exportStatus}
+        <div class="export-status" class:error={exportStatus.isError}>
+          {exportStatus.message}
+        </div>
+      {/if}
+    </div>
+    <div class="export-buttons">
+      <button class="export-btn" onclick={handleExportCalendar}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+        Calendar (.ics)
+      </button>
+      <div class="export-dropdown">
+        <button class="export-btn" onclick={() => (showExportMenu = !showExportMenu)}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          All Workouts
+        </button>
+        {#if showExportMenu}
+          <div class="export-menu">
+            <button class="export-option" onclick={() => handleExportAllWorkouts("zwo")}>
+              <span class="export-icon">Z</span>
+              <div>
+                <div class="export-name">Zwift (.zwo)</div>
+                <div class="export-desc">Bike & run workouts</div>
+              </div>
+            </button>
+            <button class="export-option" onclick={() => handleExportAllWorkouts("fit")}>
+              <span class="export-icon">G</span>
+              <div>
+                <div class="export-name">Garmin (.fit)</div>
+                <div class="export-desc">All workout types</div>
+              </div>
+            </button>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
 
@@ -528,6 +621,133 @@
   .settings-btn svg {
     width: 18px;
     height: 18px;
+  }
+
+  /* Export Section */
+  .export-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .export-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .export-header h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+
+  .export-status {
+    font-size: 0.7rem;
+    color: var(--accent);
+    padding: 0.25rem 0.5rem;
+    background: var(--accent-glow);
+    border-radius: 4px;
+  }
+
+  .export-status.error {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .export-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-medium);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+  }
+
+  .export-btn:hover {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--accent);
+  }
+
+  .export-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .export-dropdown {
+    position: relative;
+    flex: 1;
+  }
+
+  .export-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-medium);
+    border-radius: 10px;
+    padding: 0.5rem;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .export-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+    text-align: left;
+  }
+
+  .export-option:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .export-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .export-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  .export-desc {
+    font-size: 0.7rem;
+    color: var(--text-muted);
   }
 
   /* Mobile */

@@ -2,6 +2,13 @@
   import type { Workout, TrainingDay, Sport, WorkoutType } from "../../schema/training-plan.js";
   import type { Settings } from "../stores/settings.js";
   import { formatDuration, formatDistance, formatDate, getZoneInfo } from "../lib/utils.js";
+  import {
+    exportWorkout,
+    getAvailableFormats,
+    isZwoSupported,
+    isFitSupported,
+    type ExportFormat,
+  } from "../lib/export/index.js";
 
   type Mode = "view" | "edit" | "create";
 
@@ -29,6 +36,8 @@
 
   let currentMode = $state<Mode>(mode);
   let showDeleteConfirm = $state(false);
+  let showExportMenu = $state(false);
+  let exportStatus = $state<{ message: string; isError: boolean } | null>(null);
 
   // Editable fields
   let editSport = $state<Sport>(workout?.sport || "run");
@@ -119,6 +128,29 @@
       onDelete(workout.id);
     }
   }
+
+  async function handleExport(format: ExportFormat) {
+    if (!workout) return;
+    showExportMenu = false;
+    exportStatus = { message: "Exporting...", isError: false };
+
+    const result = await exportWorkout(workout, format, settings);
+
+    if (result.success) {
+      exportStatus = { message: `Downloaded ${result.filename}`, isError: false };
+    } else {
+      exportStatus = { message: result.error || "Export failed", isError: true };
+    }
+
+    // Clear status after 3 seconds
+    setTimeout(() => {
+      exportStatus = null;
+    }, 3000);
+  }
+
+  // Check available export formats for current workout
+  const availableFormats = $derived(workout ? getAvailableFormats(workout.sport) : []);
+  const canExport = $derived(availableFormats.length > 0);
 
   // Derive displayed workout (for view mode)
   const displayWorkout = $derived(
@@ -286,19 +318,63 @@
               />
             </svg>
           </button>
-        </div>
-        <button
-          class="complete-btn"
-          class:mark={!displayWorkout.completed}
-          class:unmark={displayWorkout.completed}
-          onclick={() => onToggleComplete(displayWorkout.id)}
-        >
-          {#if displayWorkout.completed}
-            <span>↩</span> Mark Incomplete
-          {:else}
-            <span>✓</span> Mark Complete
+          {#if canExport}
+            <div class="export-dropdown">
+              <button
+                class="icon-btn export"
+                onclick={() => (showExportMenu = !showExportMenu)}
+                title="Export"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </button>
+              {#if showExportMenu}
+                <div class="export-menu">
+                  {#if isZwoSupported(displayWorkout.sport)}
+                    <button class="export-option" onclick={() => handleExport("zwo")}>
+                      <span class="export-icon">Z</span>
+                      <div class="export-info">
+                        <div class="export-name">Zwift (.zwo)</div>
+                        <div class="export-desc">For Zwift indoor training</div>
+                      </div>
+                    </button>
+                  {/if}
+                  {#if isFitSupported(displayWorkout.sport)}
+                    <button class="export-option" onclick={() => handleExport("fit")}>
+                      <span class="export-icon">G</span>
+                      <div class="export-info">
+                        <div class="export-name">Garmin (.fit)</div>
+                        <div class="export-desc">For Garmin Connect</div>
+                      </div>
+                    </button>
+                  {/if}
+                </div>
+              {/if}
+            </div>
           {/if}
-        </button>
+        </div>
+        <div class="footer-right">
+          {#if exportStatus}
+            <div class="export-status" class:error={exportStatus.isError}>
+              {exportStatus.message}
+            </div>
+          {/if}
+          <button
+            class="complete-btn"
+            class:mark={!displayWorkout.completed}
+            class:unmark={displayWorkout.completed}
+            onclick={() => onToggleComplete(displayWorkout.id)}
+          >
+            {#if displayWorkout.completed}
+              <span>↩</span> Mark Incomplete
+            {:else}
+              <span>✓</span> Mark Complete
+            {/if}
+          </button>
+        </div>
       {:else}
         <button class="cancel-btn" onclick={cancelEdit}>Cancel</button>
         <button class="save-btn" onclick={handleSave} disabled={!editName}>
@@ -726,5 +802,93 @@
 
   .delete-btn:hover {
     background: #dc2626;
+  }
+
+  /* Export dropdown */
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .export-dropdown {
+    position: relative;
+  }
+
+  .icon-btn.export:hover {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .export-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-medium);
+    border-radius: 12px;
+    padding: 0.5rem;
+    min-width: 200px;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .export-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+  }
+
+  .export-option:hover {
+    background: var(--bg-tertiary);
+  }
+
+  .export-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  .export-info {
+    text-align: left;
+  }
+
+  .export-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .export-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .export-status {
+    font-size: 0.8rem;
+    color: var(--accent);
+    padding: 0.4rem 0.8rem;
+    background: var(--accent-glow);
+    border-radius: 6px;
+  }
+
+  .export-status.error {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
   }
 </style>

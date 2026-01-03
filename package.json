@@ -23,6 +23,7 @@
     "*.{js,ts,json,md,html,css,svelte}": "prettier --write"
   },
   "dependencies": {
+    "@garmin/fitsdk": "^21.178.0",
     "consola": "^3.2.3",
     "open": "^10.1.0"
   },
