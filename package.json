@@ -5,8 +5,14 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "claude-coach": "./bin/claude-coach.js"
+    "claude-coach": "bin/claude-coach.js"
   },
+  "files": [
+    "bin",
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "templates"
+  ],
   "scripts": {
     "start": "tsx src/cli.ts",
     "build": "npm run build:ts && npm run build:viewer && npm run build:skill",
