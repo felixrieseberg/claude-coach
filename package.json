@@ -1,6 +1,6 @@
 {
   "name": "claude-coach",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "author": "Felix Rieseberg <felix@felixrieseberg.com> (https://felixrieseberg.com)",
   "license": "MIT",
   "type": "module",
