@@ -21,7 +21,7 @@ First, [download the latest skill from GitHub Releases](https://github.com/felix
 
 ### Creating a plan
 
-Prompt Claude with something like this:
+Use the most capable model available to you (as I'm writing this, that's Opus 4.5). Prompt Claude with something like this:
 
 > Help me create a training plan for the Ironman 70.3 Oceanside on March 29th 2026 using the "coach" skill.
 
