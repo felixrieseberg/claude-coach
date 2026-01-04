@@ -636,7 +636,7 @@
           <h4 class="settings-section-title">Links</h4>
           <div class="about-links">
             <a
-              href="https://github.com/anthropics/claude-coach"
+              href="https://github.com/felixrieseberg/claude-coach"
               target="_blank"
               rel="noopener"
               class="about-link"
