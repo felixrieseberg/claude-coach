@@ -188,6 +188,7 @@
     workout={modalState.mode === "view" ? modalState.workout : null}
     day={modalState.day}
     mode={modalState.mode}
+    isCompleted={modalState.mode === "view" && !!completed[modalState.workout.id]}
     {settings}
     onClose={handleCloseModal}
     onToggleComplete={handleToggleComplete}

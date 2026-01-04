@@ -19,6 +19,7 @@
     day: TrainingDay;
     settings: Settings;
     mode?: Mode;
+    isCompleted?: boolean;
     onClose: () => void;
     onToggleComplete: (workoutId: string) => void;
     onSave: (workout: Partial<Workout>) => void;
@@ -31,6 +32,7 @@
     day,
     settings,
     mode = "view",
+    isCompleted = false,
     onClose,
     onToggleComplete,
     onSave,
@@ -420,11 +422,11 @@
           {/if}
           <button
             class="complete-btn"
-            class:mark={!displayWorkout.completed}
-            class:unmark={displayWorkout.completed}
+            class:mark={!isCompleted}
+            class:unmark={isCompleted}
             onclick={() => onToggleComplete(displayWorkout.id)}
           >
-            {#if displayWorkout.completed}
+            {#if isCompleted}
               <span>↩</span> Mark Incomplete
             {:else}
               <span>✓</span> Mark Complete

@@ -625,8 +625,11 @@
                 class="author-link">felixrieseberg.com</a
               >
               <span class="author-separator">·</span>
-              <a href="mailto:felix@felixrieseberg.com" class="author-link"
-                >felix@felixrieseberg.com</a
+              <a
+                href="https://twitter.com/felixrieseberg"
+                target="_blank"
+                rel="noopener"
+                class="author-link">@felixrieseberg</a
               >
             </div>
           </div>
