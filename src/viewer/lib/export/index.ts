@@ -15,6 +15,7 @@ import { generateZwo, isZwoSupported } from "./zwo.js";
 import { generateFit, isFitSupported } from "./fit.js";
 import { generateMrc, isErgSupported } from "./erg.js";
 import { generateIcs } from "./ics.js";
+import JSZip from "jszip";
 
 export type ExportFormat = "zwo" | "fit" | "mrc" | "ics";
 
@@ -168,8 +169,43 @@ export function exportPlanToCalendar(plan: TrainingPlan): ExportResult {
 }
 
 /**
- * Export all workouts in the plan to ZWO/FIT/MRC files (as a batch download)
- * For each workout, generates the appropriate file format
+ * Generate workout file content without triggering a download
+ */
+async function generateWorkoutContent(
+  workout: Workout,
+  format: "zwo" | "fit" | "mrc",
+  settings: Settings
+): Promise<{ content: string | Uint8Array; filename: string } | null> {
+  const safeName = sanitizeFilename(workout.name);
+
+  try {
+    switch (format) {
+      case "zwo": {
+        if (!isZwoSupported(workout.sport)) return null;
+        const content = generateZwo(workout, settings);
+        return { content, filename: `${safeName}.zwo` };
+      }
+      case "fit": {
+        if (!isFitSupported(workout.sport)) return null;
+        const content = await generateFit(workout, settings);
+        return { content, filename: `${safeName}.fit` };
+      }
+      case "mrc": {
+        if (!isErgSupported(workout.sport)) return null;
+        const content = generateMrc(workout, settings);
+        return { content, filename: `${safeName}.mrc` };
+      }
+      default:
+        return null;
+    }
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Export all workouts in the plan to a single ZIP file
+ * Contains ZWO/FIT/MRC files based on the selected format
  */
 export async function exportAllWorkouts(
   plan: TrainingPlan,
@@ -179,6 +215,8 @@ export async function exportAllWorkouts(
   const errors: string[] = [];
   let exported = 0;
   let skipped = 0;
+
+  const zip = new JSZip();
 
   for (const week of plan.weeks) {
     for (const day of week.days) {
@@ -203,17 +241,29 @@ export async function exportAllWorkouts(
           continue;
         }
 
-        const result = await exportWorkout(workout, format, settings);
-        if (result.success) {
-          exported++;
-        } else {
-          errors.push(`${workout.name}: ${result.error}`);
+        try {
+          const result = await generateWorkoutContent(workout, format, settings);
+          if (result) {
+            zip.file(result.filename, result.content);
+            exported++;
+          } else {
+            skipped++;
+          }
+        } catch (error) {
+          errors.push(
+            `${workout.name}: ${error instanceof Error ? error.message : "Unknown error"}`
+          );
         }
-
-        // Small delay to avoid overwhelming the browser
-        await new Promise((resolve) => setTimeout(resolve, 100));
       }
     }
+  }
+
+  // Only create and download the ZIP if there are files to export
+  if (exported > 0) {
+    const zipContent = await zip.generateAsync({ type: "uint8array" });
+    const planName = sanitizeFilename(plan.meta.event);
+    const zipFilename = `${planName}_workouts_${format}.zip`;
+    downloadFile(zipContent, zipFilename, "application/zip");
   }
 
   return { exported, skipped, errors };

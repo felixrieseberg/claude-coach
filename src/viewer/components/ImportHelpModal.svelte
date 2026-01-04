@@ -1,0 +1,795 @@
+<script lang="ts">
+  interface Props {
+    onClose: () => void;
+  }
+
+  let { onClose }: Props = $props();
+
+  let activeTab = $state<"calendar" | "zwift" | "garmin" | "trainerroad" | "generic">("calendar");
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape") onClose();
+  }
+
+  function handleBackdropClick(e: MouseEvent) {
+    if ((e.target as HTMLElement).classList.contains("modal-overlay")) {
+      onClose();
+    }
+  }
+
+  const tabs = [
+    { id: "calendar" as const, label: "Calendar Apps" },
+    { id: "zwift" as const, label: "Zwift" },
+    { id: "garmin" as const, label: "Garmin" },
+    { id: "trainerroad" as const, label: "TrainerRoad" },
+    { id: "generic" as const, label: "Other Apps" },
+  ];
+</script>
+
+<svelte:window on:keydown={handleKeydown} />
+
+<div class="modal-overlay active" onclick={handleBackdropClick} role="dialog" aria-modal="true">
+  <div class="modal import-help-modal">
+    <div class="modal-fixed-header">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Import Workouts to Your Apps</h2>
+          <p class="modal-subtitle">Step-by-step guides for importing your exported files</p>
+        </div>
+        <button class="modal-close" onclick={onClose}>×</button>
+      </div>
+
+      <div class="help-tabs">
+        {#each tabs as tab}
+          <button
+            class="help-tab"
+            class:active={activeTab === tab.id}
+            onclick={() => (activeTab = tab.id)}
+          >
+            {tab.label}
+          </button>
+        {/each}
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <!-- Calendar Apps Tab -->
+      {#if activeTab === "calendar"}
+        <div class="help-section">
+          <div class="file-type-badge">.ics files</div>
+          <p class="help-intro">
+            Calendar files (.ics) work with most calendar applications. Your workouts will appear as
+            events on the scheduled dates.
+          </p>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">📅</span> Google Calendar
+            </h4>
+            <ol class="step-list">
+              <li>Open <strong>Google Calendar</strong> in your web browser</li>
+              <li>
+                Click the <strong>+</strong> button next to "Other calendars" in the left sidebar
+              </li>
+              <li>Select <strong>"Import"</strong></li>
+              <li>
+                Click <strong>"Select file from your computer"</strong> and choose the .ics file
+              </li>
+              <li>
+                Choose which calendar to add the events to, or create a new one called "Training
+                Plan"
+              </li>
+              <li>Click <strong>"Import"</strong></li>
+            </ol>
+            <div class="tip">
+              <strong>Tip:</strong> Create a separate calendar for your training plan so you can easily
+              show/hide workouts and use a distinct color.
+            </div>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">🍎</span> Apple Calendar (Mac)
+            </h4>
+            <ol class="step-list">
+              <li>Open the <strong>Calendar</strong> app on your Mac</li>
+              <li>
+                Go to <strong>File</strong> → <strong>Import...</strong> in the menu bar
+              </li>
+              <li>Select the .ics file and click <strong>"Import"</strong></li>
+              <li>Choose which calendar to add the events to</li>
+              <li>Click <strong>"OK"</strong></li>
+            </ol>
+            <div class="tip">
+              <strong>Alternative:</strong> You can also double-click the .ics file to open it directly
+              in Calendar.
+            </div>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">📱</span> Apple Calendar (iPhone/iPad)
+            </h4>
+            <ol class="step-list">
+              <li>Email the .ics file to yourself or save it to iCloud Drive</li>
+              <li>Open the file on your device</li>
+              <li>Tap <strong>"Add All"</strong> to add the events</li>
+              <li>Choose which calendar to save them to</li>
+            </ol>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">📧</span> Outlook Calendar
+            </h4>
+            <ol class="step-list">
+              <li>Open <strong>Outlook</strong> (desktop or web)</li>
+              <li>Go to the <strong>Calendar</strong> view</li>
+              <li>
+                Click <strong>"Add calendar"</strong> →
+                <strong>"Upload from file"</strong>
+              </li>
+              <li>Browse to select your .ics file</li>
+              <li>Choose a calendar and click <strong>"Import"</strong></li>
+            </ol>
+          </div>
+        </div>
+      {/if}
+
+      <!-- Zwift Tab -->
+      {#if activeTab === "zwift"}
+        <div class="help-section">
+          <div class="file-type-badge">.zwo files</div>
+          <p class="help-intro">
+            Zwift workout files (.zwo) contain structured workouts with power targets. These work
+            for bike and run workouts in Zwift.
+          </p>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">🚴</span> Zwift (Windows)
+            </h4>
+            <ol class="step-list">
+              <li>Close Zwift if it's currently running</li>
+              <li>Open File Explorer and navigate to:</li>
+              <li>
+                <code class="path">Documents\Zwift\Workouts\[Your Zwift ID]</code>
+              </li>
+              <li>
+                If you don't know your Zwift ID, look for a folder with numbers (like "123456")
+              </li>
+              <li>Copy your .zwo files into this folder</li>
+              <li>Launch Zwift and go to <strong>Workouts</strong></li>
+              <li>
+                Click <strong>"Custom Workouts"</strong> - your workouts should appear there
+              </li>
+            </ol>
+            <div class="tip">
+              <strong>Can't find the folder?</strong> You can also open Zwift, go to Workouts, and look
+              for a "Custom Workouts" section. Zwift will create the folder when you first access workouts.
+            </div>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">🍎</span> Zwift (Mac)
+            </h4>
+            <ol class="step-list">
+              <li>Close Zwift if it's currently running</li>
+              <li>
+                Open Finder and press <strong>Cmd + Shift + G</strong> to open "Go to Folder"
+              </li>
+              <li>Type this path and press Enter:</li>
+              <li>
+                <code class="path">~/Documents/Zwift/Workouts/[Your Zwift ID]</code>
+              </li>
+              <li>Copy your .zwo files into this folder</li>
+              <li>Launch Zwift and go to <strong>Workouts</strong></li>
+              <li>
+                Your custom workouts will appear under
+                <strong>"Custom Workouts"</strong>
+              </li>
+            </ol>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">📱</span> Zwift (iOS/Android)
+            </h4>
+            <p class="note">
+              Unfortunately, Zwift mobile apps don't support importing custom .zwo files directly.
+              You'll need to:
+            </p>
+            <ol class="step-list">
+              <li>Import the workouts on a computer first (as described above)</li>
+              <li>Make sure you're signed into the same Zwift account on both devices</li>
+              <li>The workouts will sync and appear in your Custom Workouts on mobile</li>
+            </ol>
+          </div>
+
+          <div class="warning-box">
+            <strong>Important:</strong> Make sure your FTP is set correctly in your Zwift settings. The
+            workout power targets are based on percentages of FTP.
+          </div>
+        </div>
+      {/if}
+
+      <!-- Garmin Tab -->
+      {#if activeTab === "garmin"}
+        <div class="help-section">
+          <div class="file-type-badge">.fit files</div>
+          <p class="help-intro">
+            Garmin FIT files work with Garmin watches and bike computers. They include structured
+            workout targets that your device will guide you through.
+          </p>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">⌚</span> Garmin Connect (Web - Recommended)
+            </h4>
+            <ol class="step-list">
+              <li>
+                Go to <a href="https://connect.garmin.com" target="_blank" rel="noopener"
+                  >connect.garmin.com</a
+                > and sign in
+              </li>
+              <li>
+                Click <strong>"Training"</strong> in the left menu
+              </li>
+              <li>Select <strong>"Workouts"</strong></li>
+              <li>
+                Click <strong>"Import Workout"</strong> in the top right
+              </li>
+              <li>Select your .fit file and click <strong>"Import"</strong></li>
+              <li>
+                Review the workout and click <strong>"Save"</strong>
+              </li>
+              <li>
+                To send to your watch: click <strong>"Send to Device"</strong>
+                and select your Garmin device
+              </li>
+            </ol>
+            <div class="tip">
+              <strong>Tip:</strong> You can schedule workouts directly to specific dates in your Garmin
+              calendar.
+            </div>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">📱</span> Garmin Connect (Mobile App)
+            </h4>
+            <ol class="step-list">
+              <li>Open the <strong>Garmin Connect</strong> app</li>
+              <li>
+                Tap <strong>"More"</strong> (bottom right) →
+                <strong>"Training & Planning"</strong>
+              </li>
+              <li>Tap <strong>"Workouts"</strong></li>
+              <li>Tap the <strong>+</strong> button → <strong>"Import"</strong></li>
+              <li>Browse to select your .fit file</li>
+              <li>
+                Tap <strong>"Send to Device"</strong> to sync to your watch
+              </li>
+            </ol>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">💻</span> Direct USB Transfer
+            </h4>
+            <ol class="step-list">
+              <li>Connect your Garmin device to your computer via USB</li>
+              <li>Open the device in File Explorer/Finder (it appears as a drive)</li>
+              <li>
+                Navigate to <code class="path">GARMIN\WORKOUT</code> or
+                <code class="path">GARMIN\NewFiles</code>
+              </li>
+              <li>Copy your .fit files into this folder</li>
+              <li>Safely eject the device</li>
+              <li>
+                On your watch, go to an activity and select
+                <strong>"Do Workout"</strong> to find your imported workout
+              </li>
+            </ol>
+            <div class="warning-box">
+              <strong>Note:</strong> Folder names may vary slightly by device model. If WORKOUT folder
+              doesn't exist, try NewFiles instead.
+            </div>
+          </div>
+        </div>
+      {/if}
+
+      <!-- TrainerRoad Tab -->
+      {#if activeTab === "trainerroad"}
+        <div class="help-section">
+          <div class="file-type-badge">.mrc files</div>
+          <p class="help-intro">
+            MRC (ERG) files are a standard format for indoor cycling workouts. TrainerRoad and many
+            other trainer apps support this format.
+          </p>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">🚴</span> TrainerRoad (Desktop)
+            </h4>
+            <ol class="step-list">
+              <li>Open the <strong>TrainerRoad</strong> application</li>
+              <li>Go to <strong>"Career"</strong> → <strong>"Workouts"</strong></li>
+              <li>
+                Click <strong>"Import Workout"</strong> or drag and drop your .mrc file
+              </li>
+              <li>The workout will appear in your personal workout library</li>
+              <li>You can now add it to your calendar or start it directly</li>
+            </ol>
+            <div class="tip">
+              <strong>Tip:</strong> TrainerRoad will automatically convert the workout to use your current
+              FTP settings.
+            </div>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">📱</span> TrainerRoad (Mobile)
+            </h4>
+            <ol class="step-list">
+              <li>Save the .mrc file to your phone (via email or cloud storage)</li>
+              <li>Open the TrainerRoad app</li>
+              <li>Go to <strong>"Train"</strong> → <strong>"Custom"</strong></li>
+              <li>Tap <strong>"Import"</strong> and select your file</li>
+            </ol>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-icon">🖥️</span> Rouvy
+            </h4>
+            <ol class="step-list">
+              <li>Open Rouvy on your computer</li>
+              <li>Go to <strong>"Workouts"</strong></li>
+              <li>Click <strong>"Import"</strong></li>
+              <li>Select your .mrc file</li>
+              <li>The workout will be added to your library</li>
+            </ol>
+          </div>
+        </div>
+      {/if}
+
+      <!-- Generic/Other Apps Tab -->
+      {#if activeTab === "generic"}
+        <div class="help-section">
+          <p class="help-intro">
+            Many training apps support standard file formats. Here's a general guide for different
+            file types.
+          </p>
+
+          <div class="file-format-guide">
+            <h4 class="format-title">
+              <span class="file-type-badge small">.ics</span> Calendar Files
+            </h4>
+            <p>
+              Universal calendar format. Works with virtually any calendar application including
+              Google Calendar, Apple Calendar, Outlook, and more.
+            </p>
+            <div class="compatible-apps">
+              <span class="app-tag">Google Calendar</span>
+              <span class="app-tag">Apple Calendar</span>
+              <span class="app-tag">Outlook</span>
+              <span class="app-tag">Yahoo Calendar</span>
+              <span class="app-tag">Thunderbird</span>
+            </div>
+          </div>
+
+          <div class="file-format-guide">
+            <h4 class="format-title">
+              <span class="file-type-badge small">.zwo</span> Zwift Workout Files
+            </h4>
+            <p>
+              Structured workouts with power/pace targets. Primarily designed for Zwift but some
+              other apps can convert these.
+            </p>
+            <div class="compatible-apps">
+              <span class="app-tag">Zwift</span>
+              <span class="app-tag">What's on Zwift</span>
+            </div>
+          </div>
+
+          <div class="file-format-guide">
+            <h4 class="format-title">
+              <span class="file-type-badge small">.fit</span> Garmin FIT Files
+            </h4>
+            <p>
+              Industry-standard fitness file format. Works with Garmin devices and many other
+              fitness platforms.
+            </p>
+            <div class="compatible-apps">
+              <span class="app-tag">Garmin Connect</span>
+              <span class="app-tag">Wahoo SYSTM</span>
+              <span class="app-tag">Strava</span>
+              <span class="app-tag">Training Peaks</span>
+            </div>
+          </div>
+
+          <div class="file-format-guide">
+            <h4 class="format-title">
+              <span class="file-type-badge small">.mrc</span> ERG/MRC Files
+            </h4>
+            <p>
+              Classic indoor trainer workout format. Widely supported by bike trainer applications.
+            </p>
+            <div class="compatible-apps">
+              <span class="app-tag">TrainerRoad</span>
+              <span class="app-tag">Rouvy</span>
+              <span class="app-tag">Wahoo SYSTM</span>
+              <span class="app-tag">PerfPro</span>
+              <span class="app-tag">Golden Cheetah</span>
+            </div>
+          </div>
+
+          <div class="general-tips">
+            <h4>General Import Tips</h4>
+            <ul>
+              <li>Most apps have an "Import" option in the workouts or training section</li>
+              <li>If drag-and-drop doesn't work, look for a menu option or button</li>
+              <li>Some apps may require a premium subscription for workout imports</li>
+              <li>Make sure your FTP/threshold settings are up to date in the target app</li>
+              <li>If a workout looks wrong, check that units (watts, pace) match between apps</li>
+            </ul>
+          </div>
+        </div>
+      {/if}
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem;
+    padding-top: 5vh;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+    overflow-y: auto;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .import-help-modal {
+    background: var(--bg-secondary);
+    border-radius: 20px;
+    max-width: 700px;
+    width: 100%;
+    max-height: calc(100vh - 10vh - 4rem);
+    overflow: hidden;
+    border: 1px solid var(--border-medium);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .modal-fixed-header {
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .modal-header {
+    padding: 1.5rem 2rem 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .modal-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .modal-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+  }
+
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border-medium);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+  }
+
+  .help-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0 2rem 1rem;
+    overflow-x: auto;
+  }
+
+  .help-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 8px;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+  }
+
+  .help-tab:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+
+  .help-tab.active {
+    background: var(--accent);
+    color: var(--bg-primary);
+  }
+
+  .modal-body {
+    padding: 1.5rem 2rem 2rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .help-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .file-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    background: var(--accent-glow);
+    color: var(--accent);
+    border-radius: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+  }
+
+  .file-type-badge.small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .help-intro {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .app-guide {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .app-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+  }
+
+  .app-icon {
+    font-size: 1.1rem;
+  }
+
+  .step-list {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+
+  .step-list li {
+    margin-bottom: 0.5rem;
+  }
+
+  .step-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .step-list strong {
+    color: var(--text-primary);
+  }
+
+  .step-list a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .step-list a:hover {
+    text-decoration: underline;
+  }
+
+  .path {
+    background: var(--bg-primary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    display: inline-block;
+    margin: 0.25rem 0;
+    word-break: break-all;
+  }
+
+  .tip {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--accent-glow);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-left: 3px solid var(--accent);
+  }
+
+  .tip strong {
+    color: var(--accent);
+  }
+
+  .note {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .warning-box {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(249, 115, 22, 0.1);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-left: 3px solid #f97316;
+  }
+
+  .warning-box strong {
+    color: #f97316;
+  }
+
+  /* File format guides */
+  .file-format-guide {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .format-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .file-format-guide p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .compatible-apps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .app-tag {
+    padding: 0.3rem 0.6rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .general-tips {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .general-tips h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.75rem 0;
+  }
+
+  .general-tips ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.8;
+  }
+
+  .general-tips li {
+    margin-bottom: 0.25rem;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 600px) {
+    .modal-overlay {
+      padding: 1rem;
+      padding-top: 2vh;
+    }
+
+    .import-help-modal {
+      max-height: calc(100vh - 4vh - 2rem);
+    }
+
+    .modal-header {
+      padding: 1rem 1.25rem 0.75rem;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+    }
+
+    .help-tabs {
+      padding: 0 1.25rem 0.75rem;
+    }
+
+    .help-tab {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .modal-body {
+      padding: 1rem 1.25rem 1.5rem;
+    }
+
+    .app-guide {
+      padding: 1rem;
+    }
+
+    .path {
+      font-size: 0.7rem;
+    }
+  }
+</style>

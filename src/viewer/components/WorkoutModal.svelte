@@ -22,6 +22,7 @@
     onToggleComplete: (workoutId: string) => void;
     onSave: (workout: Partial<Workout>) => void;
     onDelete: (workoutId: string) => void;
+    onImportHelpClick: () => void;
   }
 
   let {
@@ -33,6 +34,7 @@
     onToggleComplete,
     onSave,
     onDelete,
+    onImportHelpClick,
   }: Props = $props();
 
   let currentMode = $state<Mode>(mode);
@@ -361,6 +363,15 @@
                       </div>
                     </button>
                   {/if}
+                  <div class="export-divider"></div>
+                  <button class="export-help-link" onclick={onImportHelpClick}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    How to import files
+                  </button>
                 </div>
               {/if}
             </div>
@@ -900,5 +911,37 @@
   .export-status.error {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
+  }
+
+  .export-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 0.5rem 0;
+  }
+
+  .export-help-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 0.8rem;
+  }
+
+  .export-help-link:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+  }
+
+  .export-help-link svg {
+    width: 14px;
+    height: 14px;
   }
 </style>

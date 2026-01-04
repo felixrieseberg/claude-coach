@@ -12,6 +12,7 @@
     open: boolean;
     onFilterChange: (filters: { sport: string; status: string }) => void;
     onSettingsClick: () => void;
+    onImportHelpClick: () => void;
   }
 
   let {
@@ -22,6 +23,7 @@
     open = $bindable(),
     onFilterChange,
     onSettingsClick,
+    onImportHelpClick,
   }: Props = $props();
 
   // Calculate stats
@@ -189,6 +191,84 @@
     Settings
   </button>
 
+  <div class="export-section">
+    {#if exportStatus}
+      <div class="export-status" class:error={exportStatus.isError}>
+        {exportStatus.message}
+      </div>
+    {/if}
+    <button class="calendar-export-btn" onclick={handleExportCalendar}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+      <div class="calendar-export-text">
+        <span class="calendar-export-title">Export to Calendar</span>
+        <span class="calendar-export-desc">Download .ics file for Apple, Google, Outlook</span>
+      </div>
+    </button>
+    <div class="export-workouts">
+      <div class="export-header">
+        <h3>Export Workouts</h3>
+      </div>
+      <div class="export-dropdown">
+        <button class="export-btn" onclick={() => (showExportMenu = !showExportMenu)}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          All Workouts
+          <svg
+            class="dropdown-arrow"
+            class:open={showExportMenu}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+        {#if showExportMenu}
+          <div class="export-menu">
+            <button class="export-option" onclick={() => handleExportAllWorkouts("zwo")}>
+              <span class="export-icon">Z</span>
+              <div>
+                <div class="export-name">Zwift (.zwo)</div>
+                <div class="export-desc">Bike & run workouts</div>
+              </div>
+            </button>
+            <button class="export-option" onclick={() => handleExportAllWorkouts("fit")}>
+              <span class="export-icon">G</span>
+              <div>
+                <div class="export-name">Garmin (.fit)</div>
+                <div class="export-desc">All workout types</div>
+              </div>
+            </button>
+            <button class="export-option" onclick={() => handleExportAllWorkouts("mrc")}>
+              <span class="export-icon">E</span>
+              <div>
+                <div class="export-name">ERG/MRC (.mrc)</div>
+                <div class="export-desc">Bike workouts only</div>
+              </div>
+            </button>
+          </div>
+        {/if}
+      </div>
+    </div>
+    <button class="import-help-link" onclick={onImportHelpClick}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+        <line x1="12" y1="17" x2="12.01" y2="17" />
+      </svg>
+      How to import to other apps
+    </button>
+  </div>
+
   <div class="sport-stats">
     <div class="sport-stats-header">
       <h3>Filter by Sport</h3>
@@ -228,63 +308,6 @@
           {label}
         </button>
       {/each}
-    </div>
-  </div>
-
-  <div class="export-section">
-    <div class="export-header">
-      <h3>Export Plan</h3>
-      {#if exportStatus}
-        <div class="export-status" class:error={exportStatus.isError}>
-          {exportStatus.message}
-        </div>
-      {/if}
-    </div>
-    <div class="export-buttons">
-      <button class="export-btn" onclick={handleExportCalendar}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
-        </svg>
-        Calendar (.ics)
-      </button>
-      <div class="export-dropdown">
-        <button class="export-btn" onclick={() => (showExportMenu = !showExportMenu)}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-            <polyline points="7 10 12 15 17 10" />
-            <line x1="12" y1="15" x2="12" y2="3" />
-          </svg>
-          All Workouts
-        </button>
-        {#if showExportMenu}
-          <div class="export-menu">
-            <button class="export-option" onclick={() => handleExportAllWorkouts("zwo")}>
-              <span class="export-icon">Z</span>
-              <div>
-                <div class="export-name">Zwift (.zwo)</div>
-                <div class="export-desc">Bike & run workouts</div>
-              </div>
-            </button>
-            <button class="export-option" onclick={() => handleExportAllWorkouts("fit")}>
-              <span class="export-icon">G</span>
-              <div>
-                <div class="export-name">Garmin (.fit)</div>
-                <div class="export-desc">All workout types</div>
-              </div>
-            </button>
-            <button class="export-option" onclick={() => handleExportAllWorkouts("mrc")}>
-              <span class="export-icon">E</span>
-              <div>
-                <div class="export-name">ERG/MRC (.mrc)</div>
-                <div class="export-desc">Bike workouts only</div>
-              </div>
-            </button>
-          </div>
-        {/if}
-      </div>
     </div>
   </div>
 </aside>
@@ -631,10 +654,73 @@
     gap: 0.75rem;
   }
 
-  .export-header {
+  .export-status {
+    font-size: 0.75rem;
+    color: var(--accent);
+    padding: 0.4rem 0.75rem;
+    background: var(--accent-glow);
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .export-status.error {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  /* Prominent Calendar Export Button */
+  .calendar-export-btn {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--run));
+    border: none;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .calendar-export-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb, 99, 102, 241), 0.3);
+  }
+
+  .calendar-export-btn:active {
+    transform: translateY(0);
+  }
+
+  .calendar-export-btn svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .calendar-export-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .calendar-export-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .calendar-export-desc {
+    font-size: 0.7rem;
+    opacity: 0.85;
+  }
+
+  /* Workouts Export */
+  .export-workouts {
+    display: flex;
+    flex-direction: column;
     gap: 0.5rem;
   }
 
@@ -645,26 +731,8 @@
     color: var(--text-muted);
   }
 
-  .export-status {
-    font-size: 0.7rem;
-    color: var(--accent);
-    padding: 0.25rem 0.5rem;
-    background: var(--accent-glow);
-    border-radius: 4px;
-  }
-
-  .export-status.error {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-  }
-
-  .export-buttons {
-    display: flex;
-    gap: 0.5rem;
-  }
-
   .export-btn {
-    flex: 1;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -690,9 +758,17 @@
     height: 14px;
   }
 
+  .dropdown-arrow {
+    margin-left: auto;
+    transition: transform var(--transition-fast);
+  }
+
+  .dropdown-arrow.open {
+    transform: rotate(180deg);
+  }
+
   .export-dropdown {
     position: relative;
-    flex: 1;
   }
 
   .export-menu {
@@ -749,6 +825,36 @@
   .export-desc {
     font-size: 0.7rem;
     color: var(--text-muted);
+  }
+
+  /* Import Help Link */
+  .import-help-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px dashed var(--border-medium);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all var(--transition-fast);
+    margin-top: 0.5rem;
+  }
+
+  .import-help-link:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-color: var(--border-medium);
+    border-style: solid;
+  }
+
+  .import-help-link svg {
+    width: 14px;
+    height: 14px;
   }
 
   /* Mobile */

@@ -4,6 +4,7 @@
   import WeeksContainer from "./components/WeeksContainer.svelte";
   import WorkoutModal from "./components/WorkoutModal.svelte";
   import SettingsModal from "./components/SettingsModal.svelte";
+  import ImportHelpModal from "./components/ImportHelpModal.svelte";
   import { planData, loadCompleted, saveCompleted } from "./stores/plan.js";
   import { loadSettings, saveSettings, type Settings } from "./stores/settings.js";
   import {
@@ -21,6 +22,7 @@
   let filters = $state({ sport: "all", status: "all" });
   let sidebarOpen = $state(false);
   let settingsOpen = $state(false);
+  let importHelpOpen = $state(false);
 
   // Workout modal state
   type ModalState =
@@ -159,6 +161,7 @@
     bind:open={sidebarOpen}
     onFilterChange={(f) => (filters = f)}
     onSettingsClick={() => (settingsOpen = true)}
+    onImportHelpClick={() => (importHelpOpen = true)}
   />
 
   <main class="main-content">
@@ -190,6 +193,7 @@
     onToggleComplete={handleToggleComplete}
     onSave={handleWorkoutSave}
     onDelete={handleWorkoutDelete}
+    onImportHelpClick={() => (importHelpOpen = true)}
   />
 {/if}
 
@@ -198,7 +202,12 @@
     {settings}
     onClose={() => (settingsOpen = false)}
     onChange={handleSettingsChange}
+    onOpenImportHelp={() => (importHelpOpen = true)}
   />
+{/if}
+
+{#if importHelpOpen}
+  <ImportHelpModal onClose={() => (importHelpOpen = false)} />
 {/if}
 
 <style>

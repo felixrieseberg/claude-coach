@@ -12,9 +12,10 @@
     settings: Settings;
     onClose: () => void;
     onChange: (settings: Settings) => void;
+    onOpenImportHelp: () => void;
   }
 
-  let { settings, onClose, onChange }: Props = $props();
+  let { settings, onClose, onChange, onOpenImportHelp }: Props = $props();
 
   let activeTab = $state("general");
   let localSettings = $state(JSON.parse(JSON.stringify(settings)));
@@ -494,6 +495,26 @@
               progress won't be there. Use the backup feature below to save your data and restore it
               later.
             </p>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h4 class="settings-section-title">Import to Other Apps</h4>
+          <div class="data-action">
+            <div class="data-action-info">
+              <span class="data-action-title">Import Help</span>
+              <span class="data-action-desc"
+                >Learn how to import exported workouts into Zwift, Garmin, TrainerRoad, and more.</span
+              >
+            </div>
+            <button class="data-btn help" onclick={onOpenImportHelp}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              View Guide
+            </button>
           </div>
         </div>
 
@@ -1030,6 +1051,12 @@
     background: #ef4444;
     border-color: #ef4444;
     color: white;
+  }
+
+  .data-btn.help:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg-primary);
   }
 
   .import-status {
