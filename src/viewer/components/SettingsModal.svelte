@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import {
     type Settings,
     type Theme,
@@ -18,7 +19,8 @@
   let { settings, onClose, onChange, onOpenImportHelp }: Props = $props();
 
   let activeTab = $state("general");
-  let localSettings = $state(JSON.parse(JSON.stringify(settings)));
+  // Use untrack to explicitly capture initial value (intentional local copy)
+  let localSettings = $state(untrack(() => JSON.parse(JSON.stringify(settings))));
 
   function handleKeydown(e: KeyboardEvent) {
     if (e.key === "Escape") onClose();
@@ -61,7 +63,7 @@
 
   // Data import/export
   let importStatus = $state<{ message: string; isError: boolean } | null>(null);
-  let fileInput: HTMLInputElement;
+  let fileInput = $state<HTMLInputElement | null>(null);
 
   function exportData() {
     const data: Record<string, string> = {};
@@ -134,7 +136,14 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div class="modal-overlay active" onclick={handleBackdropClick} role="dialog" aria-modal="true">
+<div
+  class="modal-overlay active"
+  onclick={handleBackdropClick}
+  onkeydown={handleKeydown}
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
+>
   <div class="modal settings-modal">
     <div class="modal-fixed-header">
       <div class="modal-header">

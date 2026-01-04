@@ -32,7 +32,7 @@
 
   let dragOverDate = $state<string | null>(null);
 
-  const phaseName = week.phase.toLowerCase();
+  const phaseName = $derived(week.phase.toLowerCase());
 
   function handleDragOver(e: DragEvent, date: string) {
     e.preventDefault();
@@ -77,6 +77,7 @@
         ondragleave={handleDragLeave}
         ondrop={(e) => handleDrop(e, day.date)}
         role="listbox"
+        tabindex="0"
       >
         <div class="day-header">
           <span class="day-name">{day.dayOfWeek.slice(0, 3)}</span>

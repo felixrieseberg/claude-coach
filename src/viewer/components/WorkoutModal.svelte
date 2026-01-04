@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import type { Workout, TrainingDay, Sport, WorkoutType } from "../../schema/training-plan.js";
   import type { Settings } from "../stores/settings.js";
   import { formatDuration, formatDistance, formatDate, getZoneInfo } from "../lib/utils.js";
@@ -37,20 +38,21 @@
     onImportHelpClick,
   }: Props = $props();
 
-  let currentMode = $state<Mode>(mode);
+  // Use untrack to explicitly capture initial values (these are intentional local copies)
+  let currentMode = $state<Mode>(untrack(() => mode));
   let showDeleteConfirm = $state(false);
   let showExportMenu = $state(false);
   let exportStatus = $state<{ message: string; isError: boolean } | null>(null);
 
-  // Editable fields
-  let editSport = $state<Sport>(workout?.sport || "run");
-  let editType = $state<WorkoutType>(workout?.type || "endurance");
-  let editName = $state(workout?.name || "");
-  let editDescription = $state(workout?.description || "");
-  let editDuration = $state(workout?.durationMinutes?.toString() || "");
-  let editDistance = $state(workout?.distanceMeters?.toString() || "");
-  let editZone = $state(workout?.primaryZone || "");
-  let editStructure = $state(workout?.humanReadable || "");
+  // Editable fields - intentionally capture initial values only
+  let editSport = $state<Sport>(untrack(() => workout?.sport || "run"));
+  let editType = $state<WorkoutType>(untrack(() => workout?.type || "endurance"));
+  let editName = $state(untrack(() => workout?.name || ""));
+  let editDescription = $state(untrack(() => workout?.description || ""));
+  let editDuration = $state(untrack(() => workout?.durationMinutes?.toString() || ""));
+  let editDistance = $state(untrack(() => workout?.distanceMeters?.toString() || ""));
+  let editZone = $state(untrack(() => workout?.primaryZone || ""));
+  let editStructure = $state(untrack(() => workout?.humanReadable || ""));
 
   const sports: Sport[] = ["swim", "bike", "run", "strength", "brick", "race", "rest"];
   const workoutTypes: WorkoutType[] = [
@@ -175,7 +177,14 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<div class="modal-overlay active" onclick={handleBackdropClick} role="dialog" aria-modal="true">
+<div
+  class="modal-overlay active"
+  onclick={handleBackdropClick}
+  onkeydown={handleKeydown}
+  role="dialog"
+  aria-modal="true"
+  tabindex="-1"
+>
   <div class="modal">
     <div class="modal-header">
       {#if currentMode === "view"}
@@ -243,8 +252,8 @@
         <!-- Edit/Create Mode -->
         <div class="form-grid">
           <div class="form-row">
-            <label class="form-label">Sport</label>
-            <select class="form-select" bind:value={editSport}>
+            <label class="form-label" for="edit-sport">Sport</label>
+            <select id="edit-sport" class="form-select" bind:value={editSport}>
               {#each sports as s}
                 <option value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
               {/each}
@@ -252,8 +261,8 @@
           </div>
 
           <div class="form-row">
-            <label class="form-label">Type</label>
-            <select class="form-select" bind:value={editType}>
+            <label class="form-label" for="edit-type">Type</label>
+            <select id="edit-type" class="form-select" bind:value={editType}>
               {#each workoutTypes as t}
                 <option value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
               {/each}
@@ -262,13 +271,20 @@
         </div>
 
         <div class="form-row full">
-          <label class="form-label">Name</label>
-          <input type="text" class="form-input" bind:value={editName} placeholder="Easy Run" />
+          <label class="form-label" for="edit-name">Name</label>
+          <input
+            id="edit-name"
+            type="text"
+            class="form-input"
+            bind:value={editName}
+            placeholder="Easy Run"
+          />
         </div>
 
         <div class="form-row full">
-          <label class="form-label">Description</label>
+          <label class="form-label" for="edit-description">Description</label>
           <textarea
+            id="edit-description"
             class="form-textarea"
             bind:value={editDescription}
             placeholder="Conversational pace, focus on form"
@@ -278,24 +294,43 @@
 
         <div class="form-grid">
           <div class="form-row">
-            <label class="form-label">Duration (minutes)</label>
-            <input type="number" class="form-input" bind:value={editDuration} placeholder="60" />
+            <label class="form-label" for="edit-duration">Duration (minutes)</label>
+            <input
+              id="edit-duration"
+              type="number"
+              class="form-input"
+              bind:value={editDuration}
+              placeholder="60"
+            />
           </div>
 
           <div class="form-row">
-            <label class="form-label">Distance (meters)</label>
-            <input type="number" class="form-input" bind:value={editDistance} placeholder="10000" />
+            <label class="form-label" for="edit-distance">Distance (meters)</label>
+            <input
+              id="edit-distance"
+              type="number"
+              class="form-input"
+              bind:value={editDistance}
+              placeholder="10000"
+            />
           </div>
         </div>
 
         <div class="form-row full">
-          <label class="form-label">Target Zone</label>
-          <input type="text" class="form-input" bind:value={editZone} placeholder="Zone 2" />
+          <label class="form-label" for="edit-zone">Target Zone</label>
+          <input
+            id="edit-zone"
+            type="text"
+            class="form-input"
+            bind:value={editZone}
+            placeholder="Zone 2"
+          />
         </div>
 
         <div class="form-row full">
-          <label class="form-label">Workout Structure</label>
+          <label class="form-label" for="edit-structure">Workout Structure</label>
           <textarea
+            id="edit-structure"
             class="form-textarea mono"
             bind:value={editStructure}
             placeholder="Warm-up: 10min easy&#10;Main: 4x1km @ threshold&#10;Cool-down: 10min easy"
