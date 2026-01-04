@@ -8,6 +8,7 @@
     recalculateRunPaceZones,
     recalculateSwimPaceZones,
   } from "../stores/settings.js";
+  import { version } from "../../../package.json";
 
   interface Props {
     settings: Settings;
@@ -604,7 +605,7 @@
         <div class="settings-section">
           <div class="about-header">
             <h3 class="about-title">Claude Coach</h3>
-            <span class="about-version">v0.1.0</span>
+            <span class="about-version">v{version}</span>
           </div>
           <p class="about-description">
             Personalized training plans for triathlons, marathons, and endurance events. Built with
