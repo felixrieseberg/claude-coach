@@ -161,11 +161,11 @@ Commands:
 Auth Options (for headless/Claude environments):
   --client-id=ID        Strava API client ID
   --client-secret=SEC   Strava API client secret
-  --code=CODE           Authorization code from OAuth callback URL
+  --code=URL_OR_CODE    Full redirect URL or just the authorization code
 
   Step 1: Run 'auth' with credentials to get authorization URL
-  Step 2: User clicks URL, authorizes, copies code from redirect URL
-  Step 3: Run 'auth --code=XXX' to exchange for tokens
+  Step 2: User clicks URL, authorizes, copies entire redirect URL
+  Step 3: Run 'auth --code=URL' to exchange for tokens
   Step 4: Run 'sync' to fetch activities
 
 Sync Options:
@@ -214,6 +214,23 @@ async function runAuth(args: AuthArgs): Promise<void> {
       process.exit(1);
     }
 
+    // Extract code from full URL if user pasted the entire redirect URL
+    let code = args.code;
+    if (code.includes("localhost") || code.startsWith("http")) {
+      try {
+        const url = new URL(code);
+        const extractedCode = url.searchParams.get("code");
+        if (extractedCode) {
+          code = extractedCode;
+        } else {
+          log.error("Could not find 'code' parameter in URL");
+          process.exit(1);
+        }
+      } catch {
+        // Not a valid URL, use as-is
+      }
+    }
+
     const config = loadConfig();
     log.start("Exchanging authorization code for tokens...");
 
@@ -223,7 +240,7 @@ async function runAuth(args: AuthArgs): Promise<void> {
       body: JSON.stringify({
         client_id: config.strava.client_id,
         client_secret: config.strava.client_secret,
-        code: args.code,
+        code: code,
         grant_type: "authorization_code",
       }),
     });
@@ -270,12 +287,11 @@ async function runAuth(args: AuthArgs): Promise<void> {
   console.log("\n📋 AUTHORIZATION URL:\n");
   console.log(authUrl.toString());
   console.log("\n📝 INSTRUCTIONS:");
-  console.log("1. Click or copy the URL above and open it in a browser");
+  console.log("1. Open the URL above in a browser");
   console.log("2. Click 'Authorize' on Strava");
   console.log("3. You'll be redirected to a page that won't load (that's OK!)");
-  console.log("4. Copy the 'code' parameter from the URL bar");
-  console.log("   Example: http://localhost:8765/callback?code=THIS_IS_THE_CODE&scope=...");
-  console.log("\n5. Run: npx claude-coach auth --code=YOUR_CODE_HERE\n");
+  console.log("4. Copy the ENTIRE URL from your browser's address bar");
+  console.log("5. Paste it back to Claude\n");
 }
 
 // ============================================================================

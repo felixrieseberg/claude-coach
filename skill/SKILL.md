@@ -86,30 +86,30 @@ npx claude-coach auth --client-id=CLIENT_ID --client-secret=CLIENT_SECRET
 
 This outputs an authorization URL. **Show this URL to the user** and tell them:
 
-1. Click or copy the URL and open it in a browser
+1. Open the URL in a browser
 2. Click "Authorize" on Strava
 3. You'll be redirected to a page that won't load (that's expected!)
-4. Copy the `code` parameter from the URL bar (everything after `code=` and before `&`)
+4. Copy the **entire URL** from the browser's address bar and paste it back here
 
-### Step 3: Get the Authorization Code
+### Step 3: Get the Redirect URL
 
-Use **AskUserQuestion** to get the code:
+Use **AskUserQuestion** to get the URL:
 
 ```
 questions:
-  - question: "Paste the authorization code from the redirect URL"
-    header: "Auth Code"
+  - question: "Paste the entire URL from your browser's address bar"
+    header: "Redirect URL"
     options:
-      - label: "I have the code"
-        description: "Paste the code via 'Other'"
+      - label: "I have the URL"
+        description: "Paste the full URL (starts with http://localhost...) via 'Other'"
 ```
 
 ### Step 4: Exchange Code and Sync
 
-Run these commands to complete authentication and sync:
+Run these commands to complete authentication and sync (the CLI extracts the code from the URL automatically):
 
 ```bash
-npx claude-coach auth --code=AUTHORIZATION_CODE
+npx claude-coach auth --code="FULL_REDIRECT_URL"
 npx claude-coach sync --days=730
 ```
 
