@@ -1,6 +1,8 @@
 {
   "name": "claude-coach",
   "version": "0.1.0",
+  "author": "Felix Rieseberg <felix@felixrieseberg.com> (https://felixrieseberg.com)",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "claude-coach": "./bin/claude-coach.js"
