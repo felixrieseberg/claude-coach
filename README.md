@@ -16,7 +16,7 @@ I happen to work at Anthropic, so this tool is optimized for Claude. To use this
 
 First, [download the latest skill from GitHub Releases](https://github.com/felixrieseberg/claude-coach/releases/latest/download/coach-skill.zip).
 
-- If you're using Claude.ai, open the Settings, navigate to Capabilities, then click the `+ Add` button. Upload the `coach-skill.zip` file you just downloaded.
+- If you're using Claude.ai, open the Settings, navigate to Capabilities, then click the `+ Add` button. Upload the `coach-skill.zip` file you just downloaded. There, also give Claude.ai access to Strava by adding `*.strava.com` to your allowed domains list.
 - If you're using Claude Code, run `/install-skill` and provide the path to the `coach-skill.zip` file you downloaded.
 
 ### Creating a plan
@@ -32,8 +32,6 @@ Claude will ask how you'd like to provide your fitness data. You have two option
 The easiest way to get a personalized plan is to let Claude analyze your Strava training history. This gives Claude real data about your current fitness, training patterns, and progress.
 
 Claude needs a `Client ID` and `Client Secret` to access your Strava activities. You're only giving Claude access to your data - nobody else gets to see it.
-
-**Claude.ai users:** Before starting, go to Settings → Capabilities → Skills and add `*.strava.com` to your allowed domains list. This lets Claude communicate with Strava's API.
 
 1. Go to [strava.com/settings/api](https://www.strava.com/settings/api) and log in with your Strava account
 2. You'll see a form titled "My API Application" - fill it out:

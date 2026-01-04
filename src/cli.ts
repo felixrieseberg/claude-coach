@@ -18,8 +18,23 @@ import type { StravaActivity, StravaTokenResponse } from "./strava/types.js";
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { ProxyAgent, setGlobalDispatcher } from "undici";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// ============================================================================
+// Proxy Configuration
+// ============================================================================
+
+// Configure proxy for fetch() if HTTP_PROXY or HTTPS_PROXY is set
+const proxyUrl =
+  process.env.HTTPS_PROXY ||
+  process.env.https_proxy ||
+  process.env.HTTP_PROXY ||
+  process.env.http_proxy;
+if (proxyUrl) {
+  setGlobalDispatcher(new ProxyAgent(proxyUrl));
+}
 
 // ============================================================================
 // Argument Parsing
