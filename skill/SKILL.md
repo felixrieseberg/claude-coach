@@ -58,7 +58,7 @@ questions:
 Run the sync command with the credentials:
 
 ```bash
-npx claude-coach --client-id=CLIENT_ID --client-secret=CLIENT_SECRET --days=730
+npx claude-coach sync --client-id=CLIENT_ID --client-secret=CLIENT_SECRET --days=730
 ```
 
 **Note:** On first run, this will:
@@ -67,12 +67,24 @@ npx claude-coach --client-id=CLIENT_ID --client-secret=CLIENT_SECRET --days=730
 2. Fetch 2 years of activity history
 3. Store everything in `~/.claude-coach/coach.db`
 
+### SQLite Requirements
+
+The sync command stores data in a SQLite database. The tool automatically uses the best available option:
+
+1. **Node.js 22.5+**: Uses the built-in `node:sqlite` module (no extra installation needed)
+2. **Older Node versions**: Falls back to the `sqlite3` CLI tool
+
+If you see an error about SQLite not being available:
+
+- **Recommended**: Upgrade to Node.js 22.5 or later
+- **Alternative**: Install sqlite3 CLI (`brew install sqlite3` on macOS, `apt install sqlite3` on Ubuntu)
+
 ### Subsequent Syncs
 
 To refresh data before creating a new plan:
 
 ```bash
-npx claude-coach
+npx claude-coach sync
 ```
 
 This uses cached credentials and only fetches new activities.
@@ -146,11 +158,13 @@ When working from manual data, create an assessment object with the same structu
 
 ## Database Access
 
-The athlete's training data is stored in SQLite at `~/.claude-coach/coach.db`. Query it using:
+The athlete's training data is stored in SQLite at `~/.claude-coach/coach.db`. Query it using the built-in query command:
 
 ```bash
-sqlite3 -json ~/.claude-coach/coach.db "YOUR_QUERY"
+npx claude-coach query "YOUR_QUERY" --json
 ```
+
+This works on any Node.js version (uses built-in SQLite on Node 22.5+, falls back to CLI otherwise).
 
 **Key Tables:**
 

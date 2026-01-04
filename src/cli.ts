@@ -8,7 +8,7 @@ import {
 } from "./lib/config.js";
 import { log } from "./lib/logging.js";
 import { migrate } from "./db/migrate.js";
-import { execute } from "./db/client.js";
+import { execute, initDatabase, query, queryJson } from "./db/client.js";
 import { getValidTokens } from "./strava/oauth.js";
 import { getAllActivities, getAthlete } from "./strava/api.js";
 import type { StravaActivity } from "./strava/types.js";
@@ -35,11 +35,17 @@ interface RenderArgs {
   outputFile?: string;
 }
 
+interface QueryArgs {
+  command: "query";
+  sql: string;
+  json: boolean;
+}
+
 interface HelpArgs {
   command: "help";
 }
 
-type CliArgs = SyncArgs | RenderArgs | HelpArgs;
+type CliArgs = SyncArgs | RenderArgs | QueryArgs | HelpArgs;
 
 function parseArgs(): CliArgs {
   const args = process.argv.slice(2);
@@ -84,6 +90,21 @@ function parseArgs(): CliArgs {
     return renderArgs;
   }
 
+  if (args[0] === "query") {
+    if (!args[1]) {
+      log.error("query command requires a SQL statement");
+      process.exit(1);
+    }
+
+    const queryArgs: QueryArgs = {
+      command: "query",
+      sql: args[1],
+      json: args.includes("--json"),
+    };
+
+    return queryArgs;
+  }
+
   if (args[0] === "--help" || args[0] === "-h" || args[0] === "help") {
     return { command: "help" };
   }
@@ -101,6 +122,7 @@ Usage: npx claude-coach <command> [options]
 Commands:
   sync              Sync activities from Strava (default)
   render <file>     Render a training plan JSON to HTML
+  query <sql>       Run a SQL query against the database
   help              Show this help message
 
 Sync Options:
@@ -110,6 +132,9 @@ Sync Options:
 
 Render Options:
   --output, -o FILE     Output HTML file (default: <input>.html)
+
+Query Options:
+  --json                Output as JSON (default: plain text)
 
 Examples:
   # Sync from Strava (interactive)
@@ -121,8 +146,9 @@ Examples:
   # Render a training plan to HTML
   npx claude-coach render plan.json --output my-plan.html
 
-  # Render to stdout
-  npx claude-coach render plan.json
+  # Query the database
+  npx claude-coach query "SELECT * FROM weekly_volume LIMIT 5"
+  npx claude-coach query "SELECT * FROM activities" --json
 `);
 }
 
@@ -198,6 +224,9 @@ function insertAthlete(athlete: {
 
 async function runSync(args: SyncArgs): Promise<void> {
   log.box("Claude Coach - Strava Sync");
+
+  // Step 0: Initialize SQLite backend
+  await initDatabase();
 
   // Step 1: Check/create config
   if (!configExists()) {
@@ -322,6 +351,22 @@ function runRender(args: RenderArgs): void {
 }
 
 // ============================================================================
+// Query Command
+// ============================================================================
+
+async function runQuery(args: QueryArgs): Promise<void> {
+  await initDatabase();
+
+  if (args.json) {
+    const results = queryJson(args.sql);
+    console.log(JSON.stringify(results, null, 2));
+  } else {
+    const result = query(args.sql);
+    console.log(result);
+  }
+}
+
+// ============================================================================
 // Main
 // ============================================================================
 
@@ -337,6 +382,9 @@ async function main() {
       break;
     case "render":
       runRender(args);
+      break;
+    case "query":
+      await runQuery(args);
       break;
   }
 }

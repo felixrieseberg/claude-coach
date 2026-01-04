@@ -1,6 +1,12 @@
 # SQL Queries for Athlete Assessment
 
-Run these queries against `~/.claude-coach/coach.db` to understand the athlete.
+Run these queries using the claude-coach CLI:
+
+```bash
+npx claude-coach query "YOUR_QUERY" --json
+```
+
+This works on any Node.js version (uses built-in SQLite on Node 22.5+, falls back to CLI otherwise).
 
 ## Current Form (Last 8 Weeks)
 
