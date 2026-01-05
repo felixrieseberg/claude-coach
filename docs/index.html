@@ -156,6 +156,31 @@
         box-shadow: 0 8px 24px var(--accent-glow);
       }
 
+      .nav-buttons {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .nav-github {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-medium);
+        transition: all 0.2s;
+      }
+
+      .nav-github:hover {
+        color: var(--text-primary);
+        border-color: var(--text-muted);
+      }
+
       /* Hero Section */
       .hero {
         min-height: 100vh;
@@ -1042,7 +1067,7 @@
           display: block;
         }
 
-        .nav-cta {
+        .nav-buttons {
           display: none;
         }
 
@@ -1086,9 +1111,20 @@
           <li><a href="#demos">Demos</a></li>
           <li><a href="#docs">Documentation</a></li>
         </ul>
-        <a href="https://github.com/felixrieseberg/claude-coach/releases/latest" class="nav-cta"
-          >Download</a
-        >
+        <div class="nav-buttons">
+          <a
+            href="https://github.com/felixrieseberg/claude-coach"
+            class="nav-github"
+            target="_blank"
+            rel="noopener"
+          >
+            <i data-lucide="github" style="width: 18px; height: 18px"></i>
+            GitHub
+          </a>
+          <a href="https://github.com/felixrieseberg/claude-coach/releases/latest" class="nav-cta"
+            >Download</a
+          >
+        </div>
       </div>
     </nav>
 
