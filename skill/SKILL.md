@@ -314,6 +314,8 @@ When in doubt, ask the athlete during validation. Use round distances that make 
 - Meters: 100m, 200m, 400m, 1000m, 1500m
 - Yards: 100yd, 200yd, 500yd, 1000yd, 1650yd
 
+**Week Scheduling:** Weeks must start on Monday or Sunday. Work backwards from race day to determine `planStartDate`.
+
 Here's the structure:
 
 ```json
