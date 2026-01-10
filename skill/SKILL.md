@@ -286,6 +286,31 @@ Read these files as needed during plan creation:
 
 **IMPORTANT: Output the training plan as structured JSON, then render to HTML.**
 
+### Schema Reference
+
+Before writing the plan JSON, **read the schema reference** to ensure your output is valid:
+
+```bash
+npx claude-coach schema
+```
+
+This command outputs complete documentation of:
+
+- All valid enum values (Sport, WorkoutType, IntensityUnit, etc.)
+- Required and optional fields for each object
+- Nested object structures (Workout, TrainingWeek, AthleteZones, etc.)
+- Validation rules (date formats, number ranges, etc.)
+- Common validation errors to avoid
+
+**Key Schema Requirements (quick reference):**
+
+- `version` must be exactly `"1.0"`
+- All dates must be ISO format: `YYYY-MM-DD` (e.g., `"2025-11-03"`)
+- `sport` must be one of: `"swim"`, `"bike"`, `"run"`, `"strength"`, `"brick"`, `"race"`, `"rest"`
+- `type` (workout type) must be one of: `"rest"`, `"recovery"`, `"endurance"`, `"tempo"`, `"threshold"`, `"intervals"`, `"vo2max"`, `"sprint"`, `"race"`, `"brick"`, `"technique"`, `"openwater"`, `"hills"`, `"long"`
+- `foundationLevel` must be: `"beginner"`, `"intermediate"`, `"advanced"`, or `"elite"`
+- Every workout must have `completed: false` (or `true` if already done)
+
 ### Step 1: Write JSON Plan
 
 Create a JSON file: `{event-name}-{date}.json`
@@ -444,11 +469,38 @@ Here's the structure:
               "sport": "swim",
               "type": "technique",
               "name": "Technique + Aerobic",
-              "description": "Focus on catch mechanics with aerobic base",
               "durationMinutes": 45,
               "distanceMeters": 2000,
               "primaryZone": "Zone 2",
-              "humanReadable": "Warm-up: 300m easy\nMain: 6x100m drill/swim, 800m pull\nCool-down: 200m easy",
+              "humanReadable": "WU: 300m easy\nMain: 6x100m drill/swim, 800m pull\nCD: 200m easy",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "date": "2025-11-05",
+          "dayOfWeek": "Wednesday",
+          "workouts": [
+            {
+              "id": "w1-wed-bike",
+              "sport": "bike",
+              "type": "endurance",
+              "name": "Endurance Ride",
+              "durationMinutes": 75,
+              "distanceKm": 35,
+              "primaryZone": "Zone 2",
+              "humanReadable": "75 min steady at 155-185W, 90 rpm",
+              "completed": false
+            },
+            {
+              "id": "w1-wed-run",
+              "sport": "run",
+              "type": "easy",
+              "name": "Easy Run (Brick)",
+              "durationMinutes": 20,
+              "distanceKm": 4,
+              "primaryZone": "Zone 1-2",
+              "humanReadable": "20 min easy off the bike",
               "completed": false
             }
           ]
@@ -494,13 +546,27 @@ Here's the structure:
 }
 ```
 
-### Step 2: Render to HTML
+> **Note:** This is an abbreviated example showing one week. For complete type definitions and all valid enum values, run `npx claude-coach schema`.
+
+### Step 2: Validate the Plan (Optional)
+
+You can validate the JSON before rendering to catch schema errors early:
+
+```bash
+npx claude-coach validate plan.json
+```
+
+This will report any schema violations with specific paths and error messages. Fix any errors before proceeding.
+
+### Step 3: Render to HTML
 
 After writing the JSON file, render it to an interactive HTML viewer:
 
 ```bash
 npx claude-coach render plan.json --output plan.html
 ```
+
+**Note:** The render command automatically validates the plan against the schema. If validation fails, it will print the errors and exit without creating the HTML file.
 
 This creates a beautiful, interactive training plan with:
 
@@ -510,7 +576,7 @@ This creates a beautiful, interactive training plan with:
 - Week summaries with hours by sport
 - Dark mode, mobile responsive
 
-### Step 3: Tell the User
+### Step 4: Tell the User
 
 After both files are created, tell the user:
 
