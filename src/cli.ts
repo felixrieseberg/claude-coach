@@ -19,6 +19,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { ProxyAgent, setGlobalDispatcher } from "undici";
+import { validatePlan, formatValidationErrors } from "./schema/training-plan.schema.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -72,7 +73,16 @@ interface HelpArgs {
   command: "help";
 }
 
-type CliArgs = SyncArgs | RenderArgs | QueryArgs | AuthArgs | HelpArgs;
+interface ValidateArgs {
+  command: "validate";
+  inputFile: string;
+}
+
+interface SchemaArgs {
+  command: "schema";
+}
+
+type CliArgs = SyncArgs | RenderArgs | QueryArgs | AuthArgs | HelpArgs | ValidateArgs | SchemaArgs;
 
 function parseArgs(): CliArgs {
   const args = process.argv.slice(2);
@@ -152,6 +162,22 @@ function parseArgs(): CliArgs {
     return authArgs;
   }
 
+  if (args[0] === "validate") {
+    if (!args[1]) {
+      log.error("validate command requires an input file");
+      process.exit(1);
+    }
+
+    return {
+      command: "validate",
+      inputFile: args[1],
+    };
+  }
+
+  if (args[0] === "schema") {
+    return { command: "schema" };
+  }
+
   if (args[0] === "--help" || args[0] === "-h" || args[0] === "help") {
     return { command: "help" };
   }
@@ -169,6 +195,8 @@ Usage: npx claude-coach <command> [options]
 Commands:
   sync              Sync activities from Strava
   auth              Get Strava authorization URL or exchange code for tokens
+  schema            Print the training plan JSON schema reference
+  validate <file>   Validate a training plan JSON against the schema
   render <file>     Render a training plan JSON to HTML
   query <sql>       Run a SQL query against the database
   help              Show this help message
@@ -204,7 +232,13 @@ Examples:
   # Interactive auth flow (opens browser)
   npx claude-coach sync --client-id=12345 --client-secret=abc123
 
-  # Render a training plan to HTML
+  # Get the schema reference for plan JSON
+  npx claude-coach schema
+
+  # Validate a training plan JSON
+  npx claude-coach validate plan.json
+
+  # Render a training plan to HTML (includes validation)
   npx claude-coach render plan.json --output my-plan.html
 
   # Query the database
@@ -546,13 +580,23 @@ function runRender(args: RenderArgs): void {
     process.exit(1);
   }
 
-  // Validate it's valid JSON
+  // Parse JSON
+  let planData: unknown;
   try {
-    JSON.parse(planJson);
+    planData = JSON.parse(planJson);
   } catch (err) {
     log.error("Input file is not valid JSON");
     process.exit(1);
   }
+
+  // Validate against schema
+  const validation = validatePlan(planData);
+  if (!validation.success) {
+    log.error("Training plan validation failed:");
+    console.error(formatValidationErrors(validation.errors));
+    process.exit(1);
+  }
+  log.success("Plan schema validated successfully");
 
   // Read the template
   const templatePath = getTemplatePath();
@@ -590,6 +634,268 @@ async function runQuery(args: QueryArgs): Promise<void> {
 }
 
 // ============================================================================
+// Validate Command
+// ============================================================================
+
+function runValidate(args: ValidateArgs): void {
+  log.start("Validating training plan...");
+
+  // Read the plan JSON
+  let planJson: string;
+  try {
+    planJson = readFileSync(args.inputFile, "utf-8");
+  } catch (err) {
+    log.error(`Could not read input file: ${args.inputFile}`);
+    process.exit(1);
+  }
+
+  // Parse JSON
+  let planData: unknown;
+  try {
+    planData = JSON.parse(planJson);
+  } catch (err) {
+    log.error("Input file is not valid JSON");
+    process.exit(1);
+  }
+
+  // Validate against schema
+  const validation = validatePlan(planData);
+  if (!validation.success) {
+    log.error("Validation failed:");
+    console.error(formatValidationErrors(validation.errors));
+    process.exit(1);
+  }
+
+  log.success("Plan is valid!");
+}
+
+// ============================================================================
+// Schema Command
+// ============================================================================
+
+function runSchema(): void {
+  console.log(`
+# Training Plan JSON Schema Reference
+
+This document describes the required structure for training plan JSON files.
+
+## Root Structure
+
+\`\`\`typescript
+{
+  version: "1.0",                    // Required: Must be exactly "1.0"
+  meta: PlanMeta,                    // Required: Plan metadata
+  preferences: UnitPreferences,      // Required: Unit system preferences
+  assessment: AthleteAssessment,     // Required: Athlete fitness assessment
+  zones: AthleteZones,               // Required: Training zones
+  phases: TrainingPhase[],           // Required: Macro training phases
+  weeks: TrainingWeek[],             // Required: Weekly training schedule
+  raceStrategy: RaceStrategy         // Required: Race day strategy
+}
+\`\`\`
+
+## Enums (Valid Values)
+
+### Sport
+\`"swim" | "bike" | "run" | "strength" | "brick" | "race" | "rest"\`
+
+### WorkoutType
+\`"rest" | "recovery" | "endurance" | "tempo" | "threshold" | "intervals" | "vo2max" | "sprint" | "race" | "brick" | "technique" | "openwater" | "hills" | "long"\`
+
+### FoundationLevel
+\`"beginner" | "intermediate" | "advanced" | "elite"\`
+
+### Unit Preferences
+- swim: \`"meters" | "yards"\`
+- bike: \`"kilometers" | "miles"\`
+- run: \`"kilometers" | "miles"\`
+- firstDayOfWeek: \`"monday" | "sunday"\`
+
+## Key Objects
+
+### PlanMeta
+\`\`\`typescript
+{
+  id: string,                        // Unique plan identifier
+  athlete: string,                   // Athlete's name
+  event: string,                     // Target event name
+  eventDate: "YYYY-MM-DD",           // Event date (ISO format)
+  planStartDate: "YYYY-MM-DD",       // Plan start date
+  planEndDate: "YYYY-MM-DD",         // Plan end date
+  createdAt: string,                 // ISO datetime
+  updatedAt: string,                 // ISO datetime
+  totalWeeks: number,                // Total weeks in plan
+  generatedBy: string                // "Claude Coach"
+}
+\`\`\`
+
+### Workout
+\`\`\`typescript
+{
+  id: string,                        // Required: Unique workout ID
+  sport: Sport,                      // Required: See Sport enum
+  type: WorkoutType,                 // Required: See WorkoutType enum
+  name: string,                      // Required: Workout name
+  description: string,               // Required: Workout description
+  durationMinutes?: number,          // Optional: Duration in minutes
+  distanceMeters?: number,           // Optional: Distance in meters
+  primaryZone?: string,              // Optional: Target zone ("Zone 2", etc.)
+  targetHR?: { low: number, high: number },
+  targetPower?: { low: number, high: number },
+  targetPace?: { low: string, high: string },
+  rpe?: number,                      // Optional: 1-10 RPE scale
+  structure?: StructuredWorkout,     // Optional: For device export
+  humanReadable?: string,            // Optional: Workout text
+  completed: boolean                 // Required: Always false for new plans
+}
+\`\`\`
+
+### TrainingDay
+\`\`\`typescript
+{
+  date: "YYYY-MM-DD",                // Required: ISO date format
+  dayOfWeek: string,                 // Required: "Monday", "Tuesday", etc.
+  workouts: Workout[]                // Required: Array of workouts
+}
+\`\`\`
+
+### TrainingWeek
+\`\`\`typescript
+{
+  weekNumber: number,                // Required: 1-based week number
+  startDate: "YYYY-MM-DD",           // Required: Week start date
+  endDate: "YYYY-MM-DD",             // Required: Week end date
+  phase: string,                     // Required: Phase name
+  focus: string,                     // Required: Week focus
+  targetHours: number,               // Required: Target hours
+  days: TrainingDay[],               // Required: 7 days
+  summary: WeekSummary,              // Required: Week totals
+  isRecoveryWeek: boolean            // Required: Recovery week flag
+}
+\`\`\`
+
+### WeekSummary
+\`\`\`typescript
+{
+  totalHours: number,                // Required: Total hours
+  totalTSS?: number,                 // Optional: Training stress score
+  bySport?: {                        // Optional: Breakdown by sport
+    [sport]: { sessions: number, hours: number, km?: number }
+  }
+}
+\`\`\`
+
+### AthleteAssessment
+\`\`\`typescript
+{
+  foundation: {
+    raceHistory: string[],           // Past race names
+    peakTrainingLoad: number,        // Peak hours/week
+    foundationLevel: FoundationLevel,
+    yearsInSport: number
+  },
+  currentForm: {
+    weeklyVolume: { total: number, swim?: number, bike?: number, run?: number },
+    longestSessions: { swim?: number, bike?: number, run?: number },
+    consistency: number              // Sessions/week
+  },
+  strengths: [{ sport: Sport, evidence: string }],
+  limiters: [{ sport: Sport, evidence: string }],
+  constraints: string[]              // Schedule/injury constraints
+}
+\`\`\`
+
+### TrainingPhase
+\`\`\`typescript
+{
+  name: string,                      // "Base", "Build", "Peak", "Taper"
+  startWeek: number,                 // Starting week number
+  endWeek: number,                   // Ending week number
+  focus: string,                     // Phase focus
+  weeklyHoursRange: { low: number, high: number },
+  keyWorkouts: string[],             // Key session types
+  physiologicalGoals: string[]       // Training adaptations
+}
+\`\`\`
+
+### AthleteZones
+\`\`\`typescript
+{
+  run?: {
+    hr?: { lthr: number, zones: HRZone[] },
+    pace?: { thresholdPace: string, thresholdPaceSeconds: number, zones: PaceZone[] }
+  },
+  bike?: {
+    hr?: { lthr: number, zones: HRZone[] },
+    power?: { ftp: number, zones: PowerZone[] }
+  },
+  swim?: {
+    css: string,                     // "1:45/100m"
+    cssSeconds: number,              // Per 100m
+    zones: SwimZone[]
+  },
+  maxHR?: number,
+  restingHR?: number,
+  weight?: number                    // kg
+}
+\`\`\`
+
+### RaceStrategy
+\`\`\`typescript
+{
+  event: {
+    name: string,
+    date: string,
+    type: string,
+    distances?: { swim?: number, bike?: number, run?: number }
+  },
+  pacing: {
+    swim?: { target: string, notes: string },
+    bike?: { targetPower: string, targetHR: string, notes: string },
+    run?: { targetPace: string, targetHR: string, notes: string }
+  },
+  nutrition: {
+    preRace: string,
+    during: { carbsPerHour: number, fluidPerHour: string, products: string[] },
+    notes: string
+  },
+  taper: {
+    startDate: string,
+    volumeReduction: number,         // Percentage
+    notes: string
+  },
+  raceDay?: {
+    wakeUpTime?: string,
+    preRaceMeal?: string,
+    warmUp?: string,
+    mentalCues?: string[]
+  }
+}
+\`\`\`
+
+## Common Validation Errors
+
+1. **Date format**: All dates must be "YYYY-MM-DD" (e.g., "2025-11-03")
+2. **Missing completed**: Every workout must have \`completed: false\`
+3. **Invalid sport**: Must use exact enum values, case-sensitive
+4. **Missing required fields**: Check all required fields are present
+5. **Invalid version**: Must be exactly "1.0"
+
+## Validation
+
+Use these commands to validate your plan:
+
+\`\`\`bash
+# Validate only
+npx claude-coach validate plan.json
+
+# Render (includes validation)
+npx claude-coach render plan.json --output plan.html
+\`\`\`
+`);
+}
+
+// ============================================================================
 // Main
 // ============================================================================
 
@@ -605,6 +911,12 @@ async function main() {
       break;
     case "sync":
       await runSync(args);
+      break;
+    case "schema":
+      runSchema();
+      break;
+    case "validate":
+      runValidate(args);
       break;
     case "render":
       runRender(args);
