@@ -28,7 +28,12 @@ export type WorkoutType =
   | "technique"
   | "openwater"
   | "hills"
-  | "long";
+  | "long"
+  // Trail running specific
+  | "trail"
+  | "uphill_repeats"
+  | "downhill_technique"
+  | "vertical";
 
 export type IntensityUnit =
   | "percent_ftp"
@@ -54,6 +59,24 @@ export type StepType = "warmup" | "work" | "recovery" | "rest" | "cooldown" | "i
 export type SwimDistanceUnit = "meters" | "yards";
 export type LandDistanceUnit = "kilometers" | "miles";
 export type FirstDayOfWeek = "monday" | "sunday";
+
+// Trail running terrain types
+export type TerrainType =
+  | "road"
+  | "track"
+  | "trail_smooth"
+  | "trail_technical"
+  | "trail_alpine"
+  | "mixed"
+  | "sand"
+  | "snow";
+
+export interface TerrainInfo {
+  type: TerrainType;
+  elevationProfile?: "flat" | "rolling" | "hilly" | "mountainous";
+  technicalDifficulty?: "easy" | "moderate" | "technical" | "extreme";
+  notes?: string; // e.g., "Rocky singletrack", "Steep fire roads"
+}
 
 export interface UnitPreferences {
   swim: SwimDistanceUnit;
@@ -127,6 +150,13 @@ export interface Workout {
   durationMinutes?: number;
   distanceMeters?: number;
 
+  // Elevation targets (trail running)
+  elevationGainMeters?: number; // Target elevation gain
+  elevationLossMeters?: number; // Target elevation loss (for downhill-focused workouts)
+
+  // Terrain info (trail running)
+  terrain?: TerrainInfo;
+
   // Intensity summary
   primaryZone?: string; // "Zone 2", "Threshold", etc.
   targetHR?: { low: number; high: number };
@@ -145,6 +175,7 @@ export interface Workout {
   completedAt?: string; // ISO date
   actualDuration?: number;
   actualDistance?: number;
+  actualElevationGain?: number; // Actual elevation gained
   notes?: string;
 }
 
@@ -161,11 +192,13 @@ export interface TrainingDay {
 export interface WeekSummary {
   totalHours: number;
   totalTSS?: number;
+  totalElevationGain?: number; // meters - weekly elevation volume
   bySport: {
     [key in Sport]?: {
       sessions: number;
       hours: number;
       km?: number;
+      elevationGain?: number; // meters - elevation gain per sport
     };
   };
 }

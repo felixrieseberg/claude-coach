@@ -84,6 +84,7 @@ SELECT
   COUNT(*) AS sessions,
   ROUND(SUM(moving_time) / 3600.0, 1) AS hours,
   ROUND(SUM(distance) / 1000.0, 1) AS km,
+  ROUND(SUM(total_elevation_gain), 0) AS elevation_gain,
   ROUND(AVG(average_heartrate), 0) AS avg_hr,
   ROUND(AVG(suffer_score), 0) AS avg_effort
 FROM activities
@@ -98,6 +99,7 @@ SELECT
   name,
   moving_time / 60 AS minutes,
   ROUND(distance / 1000.0, 1) AS km,
+  ROUND(total_elevation_gain, 0) AS elevation_gain,
   ROUND(average_heartrate, 0) AS hr,
   suffer_score
 FROM activities
