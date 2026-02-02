@@ -1,6 +1,6 @@
 # Claude Coach
 
-AI-powered training plan generator for endurance athletes (triathlon, marathon, ultra-running). Uses Claude AI to create personalized plans with optional Strava integration.
+AI-powered training plan generator for endurance athletes (triathlon, marathon, ultra-running, trail running). Uses Claude AI to create personalized plans with optional Strava integration.
 
 ## Quick Commands
 
@@ -48,6 +48,7 @@ src/
 ## Testing
 
 Tests are in `tests/` directory, mirroring `src/` structure:
+
 - `tests/cli/` - CLI argument parsing, config, database, Strava API
 - `tests/viewer/` - Export formats, utilities, plan validation
 
@@ -56,13 +57,37 @@ Run specific tests: `npm test -- path/to/test.test.ts`
 ## Export Formats
 
 The viewer supports exporting workouts to:
+
 - **ICS** - Calendar apps (RFC 5545)
 - **ZWO** - Zwift workouts
 - **FIT** - Garmin devices (uses @garmin/fitsdk)
 - **ERG** - TrainerRoad/TrainerDay
 
+## Trail Running Support
+
+The schema supports trail-specific training with:
+
+**Workout Types:**
+
+- `trail` - General trail running
+- `uphill_repeats` - Climbing intervals
+- `downhill_technique` - Descent practice
+- `vertical` - Dedicated vert workouts
+
+**Terrain Info:**
+
+- Types: `trail_smooth`, `trail_technical`, `trail_alpine`, `mixed`, etc.
+- Elevation profiles: `flat`, `rolling`, `hilly`, `mountainous`
+- Technical difficulty: `easy`, `moderate`, `technical`, `extreme`
+
+**Elevation Tracking:**
+
+- Per-workout: `elevationGainMeters`, `elevationLossMeters` targets
+- Weekly summary: `totalElevationGain` and per-sport elevation
+
 ## Pre-commit Hooks
 
 Husky runs on commit:
+
 1. `npm run typecheck` - Must pass type checking
 2. `npx lint-staged` - Prettier formats staged files
