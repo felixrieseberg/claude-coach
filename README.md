@@ -29,7 +29,14 @@ First, [download the latest skill from GitHub Releases](https://github.com/felix
 
 **Claude Code:**
 
-1. Run `/install-skill` and provide the path to the `coach-skill.zip` file you downloaded.
+Claude Code loads skills from `~/.claude/skills/<skill-name>/` (available in all your projects) or `.claude/skills/<skill-name>/` (a single project). Extract `coach-skill.zip` into a `coach` folder in either location, so that `SKILL.md` ends up at `~/.claude/skills/coach/SKILL.md` (or `.claude/skills/coach/SKILL.md`). On macOS or Linux, adjusting the path to wherever you saved the zip:
+
+```sh
+mkdir -p ~/.claude/skills/coach
+unzip -o ~/Downloads/coach-skill.zip -d ~/.claude/skills/coach
+```
+
+Then start a new Claude Code session (or restart a running one) so it picks up the skill. See the [Claude Code skills documentation](https://code.claude.com/docs/en/skills) for details.
 
 ### Creating a plan
 
