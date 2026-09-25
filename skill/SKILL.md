@@ -225,15 +225,16 @@ This works on any Node.js version (uses built-in SQLite on Node 22.5+, falls bac
 
 Read these files as needed during plan creation:
 
-| File                                 | When to Read                | Contents                                     |
-| ------------------------------------ | --------------------------- | -------------------------------------------- |
-| `skill/reference/queries.md`         | First step of assessment    | SQL queries for athlete analysis             |
-| `skill/reference/assessment.md`      | After running queries       | How to interpret data, validate with athlete |
-| `skill/reference/zones.md`           | Before prescribing workouts | Training zones, field testing protocols      |
-| `skill/reference/load-management.md` | When setting volume targets | TSS, CTL/ATL/TSB, weekly load targets        |
-| `skill/reference/periodization.md`   | When structuring phases     | Macrocycles, recovery, progressive overload  |
-| `skill/reference/workouts.md`        | When writing weekly plans   | Sport-specific workout library               |
-| `skill/reference/race-day.md`        | Final section of plan       | Pacing strategy, nutrition                   |
+| File                                   | When to Read                   | Contents                                              |
+| -------------------------------------- | ------------------------------ | ----------------------------------------------------- |
+| `skill/reference/queries.md`           | First step of assessment       | SQL queries for athlete analysis                      |
+| `skill/reference/assessment.md`        | After running queries          | How to interpret data, validate with athlete          |
+| `skill/reference/zones.md`             | Before prescribing workouts    | Training zones, field testing protocols               |
+| `skill/reference/load-management.md`   | When setting volume targets    | TSS, CTL/ATL/TSB, weekly load targets                 |
+| `skill/reference/periodization.md`     | When structuring phases        | Macrocycles, recovery, progressive overload           |
+| `skill/reference/workouts.md`          | When writing weekly plans      | Sport-specific workout library                        |
+| `skill/reference/workout-structure.md` | When writing bike/run workouts | `structure` field for Zwift/Garmin/TrainerRoad export |
+| `skill/reference/race-day.md`          | Final section of plan          | Pacing strategy, nutrition                            |
 
 ---
 
@@ -272,7 +273,7 @@ Read these files as needed during plan creation:
 ### Phase 4: Plan Design
 
 8. Read `skill/reference/periodization.md` for phase structure
-9. Read `skill/reference/workouts.md` to build weekly sessions
+9. Read `skill/reference/workouts.md` to build weekly sessions, and `skill/reference/workout-structure.md` to give each bike/run workout an exportable `structure`
 10. Calculate weeks until event, design phases
 
 ### Phase 5: Plan Delivery
@@ -315,6 +316,15 @@ When in doubt, ask the athlete during validation. Use round distances that make 
 - Yards: 100yd, 200yd, 500yd, 1000yd, 1650yd
 
 **Week Scheduling:** Weeks must start on Monday or Sunday. Work backwards from race day to determine `planStartDate`.
+
+**Structured Workouts (required for bike and run):** The viewer exports workouts to Zwift (`.zwo`), Garmin (`.fit`) and TrainerRoad (`.mrc`), and those exports only contain real intervals when the workout has a `structure` field. Without it, every export collapses to a generic warmup, one steady block, and a cooldown. So every `bike` and `run` workout (including walk/run sessions) must include `structure` alongside `humanReadable`:
+
+- `warmup`, `main`, `cooldown` are arrays of steps. A step is `{ "type", "name", "duration": { "unit", "value" }, "intensity": { "unit", "value" } }` with `type` one of `warmup`, `work`, `recovery`, `cooldown`.
+- Repeats go in `main` as an interval set: `{ "type": "interval_set", "name", "repeats": 4, "steps": [ work step, recovery step ] }`. "4x (2 min run / 2 min walk)" is one interval set with `repeats: 4`, never a single 16-minute step.
+- Durations use `minutes` or `seconds`. Intensity is a percentage of threshold: `percent_ftp` for bike, `percent_lthr` for run, with `value` as the percent number (e.g. `65`, not a zone number). Put the zone or pace label in `intensity.description`.
+- Step durations should add up to `durationMinutes`. `humanReadable` stays as the display text and should describe the same session.
+
+See `skill/reference/workout-structure.md` for the full shape and worked examples. Swim and brick workouts may include `structure` too; rest and strength workouts don't need it.
 
 Here's the structure:
 
@@ -452,6 +462,80 @@ Here's the structure:
               "completed": false
             }
           ]
+        },
+        {
+          "date": "2025-11-05",
+          "dayOfWeek": "Wednesday",
+          "workouts": [
+            {
+              "id": "w1-wed-bike",
+              "sport": "bike",
+              "type": "tempo",
+              "name": "Tempo Intervals",
+              "description": "Muscular endurance on the trainer",
+              "durationMinutes": 60,
+              "primaryZone": "Tempo",
+              "targetPower": { "low": 190, "high": 225 },
+              "structure": {
+                "warmup": [
+                  {
+                    "type": "warmup",
+                    "name": "Easy spin",
+                    "duration": { "unit": "minutes", "value": 15 },
+                    "intensity": {
+                      "unit": "percent_ftp",
+                      "value": 65,
+                      "valueLow": 50,
+                      "valueHigh": 65,
+                      "description": "Zone 1-2"
+                    }
+                  }
+                ],
+                "main": [
+                  {
+                    "type": "interval_set",
+                    "name": "Tempo blocks",
+                    "repeats": 3,
+                    "steps": [
+                      {
+                        "type": "work",
+                        "name": "Tempo",
+                        "duration": { "unit": "minutes", "value": 8 },
+                        "intensity": {
+                          "unit": "percent_ftp",
+                          "value": 85,
+                          "description": "Zone 3"
+                        },
+                        "cadence": { "low": 85, "high": 95 }
+                      },
+                      {
+                        "type": "recovery",
+                        "name": "Easy spin",
+                        "duration": { "unit": "minutes", "value": 4 },
+                        "intensity": { "unit": "percent_ftp", "value": 55, "description": "Zone 1" }
+                      }
+                    ]
+                  }
+                ],
+                "cooldown": [
+                  {
+                    "type": "cooldown",
+                    "name": "Easy spin",
+                    "duration": { "unit": "minutes", "value": 9 },
+                    "intensity": {
+                      "unit": "percent_ftp",
+                      "value": 55,
+                      "valueLow": 40,
+                      "valueHigh": 55,
+                      "description": "Zone 1"
+                    }
+                  }
+                ]
+              },
+              "humanReadable": "Warm-up: 15min easy spin\nMain: 3x (8min @ 85% FTP / 4min easy)\nCool-down: 9min easy",
+              "completed": false
+            }
+          ]
         }
       ],
       "summary": {
@@ -541,6 +625,7 @@ After both files are created, tell the user:
 - **Distinguish foundation from form** - An Ironman finisher who took 3 months off is NOT the same as a beginner
 - **Zones must be established** before prescribing specific workouts
 - **Output JSON, then render HTML** - Write the plan as `.json`, then use `npx claude-coach render` to create the HTML viewer
+- **Give bike and run workouts a `structure`** - Exports to Zwift, Garmin and TrainerRoad only have intervals when `structure` is present; `humanReadable` alone is not enough
 - **Explain the "why"** - Athletes trust and follow plans they understand
 - **Be conservative with manual data** - When working without Strava, err on the side of caution with volume and intensity
 - **Recommend field tests** - For manual data athletes, include zone validation workouts in the first 1-2 weeks

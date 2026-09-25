@@ -274,6 +274,70 @@ describe("ZWO Export", () => {
       );
     });
 
+    it("should export a structured walk/run session as warmup, repeated intervals, and cooldown", () => {
+      // Mirrors the worked example in skill/reference/workout-structure.md (issue #8):
+      // 5 min walk, 4x (2 min run / 2 min walk), 4 min walk
+      const workout = createWorkout({
+        name: "Walk/Run Intervals",
+        sport: "run",
+        type: "endurance",
+        durationMinutes: 25,
+        structure: {
+          warmup: [
+            {
+              type: "warmup",
+              name: "Easy walk",
+              duration: { unit: "minutes", value: 5 },
+              intensity: { unit: "percent_lthr", value: 60, valueLow: 50, valueHigh: 60 },
+            },
+          ],
+          main: [
+            {
+              type: "interval_set",
+              name: "Run/walk",
+              repeats: 4,
+              steps: [
+                {
+                  type: "work",
+                  name: "Run",
+                  duration: { unit: "minutes", value: 2 },
+                  intensity: { unit: "percent_lthr", value: 85 },
+                },
+                {
+                  type: "recovery",
+                  name: "Walk",
+                  duration: { unit: "minutes", value: 2 },
+                  intensity: { unit: "percent_lthr", value: 60 },
+                },
+              ],
+            },
+          ],
+          cooldown: [
+            {
+              type: "cooldown",
+              name: "Easy walk",
+              duration: { unit: "minutes", value: 4 },
+              intensity: { unit: "percent_lthr", value: 60, valueLow: 50, valueHigh: 60 },
+            },
+          ],
+        },
+      });
+
+      const xml = generateZwo(workout, mockSettings);
+
+      expect(xml).toContain("<sportType>run</sportType>");
+
+      const segments = xml.match(/<(Warmup|SteadyState|Ramp|IntervalsT|Cooldown)\b[^>]*\/>/g) ?? [];
+      expect(segments).toEqual([
+        '<Warmup Duration="300" PowerLow="0.50" PowerHigh="0.60"/>',
+        '<IntervalsT Repeat="4" OnDuration="120" OffDuration="120" OnPower="0.85" OffPower="0.60"/>',
+        '<Cooldown Duration="240" PowerLow="0.60" PowerHigh="0.50"/>',
+      ]);
+
+      // Must not fall back to the generic single steady block
+      expect(xml).not.toMatch(/<SteadyState\s+Duration="900"/);
+    });
+
     it("should include cadence when specified in workout steps", () => {
       const workout = createWorkout({
         name: "Cadence Workout",
