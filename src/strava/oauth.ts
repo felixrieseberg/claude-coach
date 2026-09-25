@@ -16,31 +16,43 @@ import type { StravaTokenResponse } from "./types.js";
 const REDIRECT_PORT = 8765;
 const REDIRECT_URI = `http://localhost:${REDIRECT_PORT}/callback`;
 const AUTHORIZE_URL = "https://www.strava.com/oauth/authorize";
-const TOKEN_URL = "https://www.strava.com/oauth/token";
+export const TOKEN_URL = "https://www.strava.com/oauth/token";
 /** How long the local callback server waits for the browser round trip. */
 export const AUTHORIZE_TIMEOUT_MS = 5 * 60 * 1000;
 
-function safeEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+/**
+ * A fresh random OAuth `state` value. It binds a callback to the authorization
+ * request that produced it, so a code issued for a different (e.g.
+ * attacker-initiated) request can be rejected.
+ */
+export function createAuthState(): string {
+  return randomBytes(32).toString("hex");
+}
+
+/** Constant-time check that a returned `state` is the one we issued. */
+export function authStateMatches(returned: string | null | undefined, expected: string): boolean {
+  const a = Buffer.from(returned ?? "");
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
+export function buildAuthorizeUrl(clientId: string, state: string): URL {
+  const authUrl = new URL(AUTHORIZE_URL);
+  authUrl.searchParams.set("client_id", clientId);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("redirect_uri", REDIRECT_URI);
+  authUrl.searchParams.set("scope", "activity:read_all");
+  authUrl.searchParams.set("approval_prompt", "auto");
+  authUrl.searchParams.set("state", state);
+  return authUrl;
 }
 
 export async function authorize(): Promise<Tokens> {
   const config = loadConfig();
   const { client_id, client_secret } = config.strava;
 
-  // Binds the callback to this authorization request so a code issued for a
-  // different (e.g. attacker-initiated) request is rejected.
-  const state = randomBytes(32).toString("hex");
-
-  const authUrl = new URL(AUTHORIZE_URL);
-  authUrl.searchParams.set("client_id", client_id);
-  authUrl.searchParams.set("response_type", "code");
-  authUrl.searchParams.set("redirect_uri", REDIRECT_URI);
-  authUrl.searchParams.set("scope", "activity:read_all");
-  authUrl.searchParams.set("approval_prompt", "auto");
-  authUrl.searchParams.set("state", state);
+  const state = createAuthState();
+  const authUrl = buildAuthorizeUrl(client_id, state);
 
   log.info("Opening browser for Strava authorization...");
 
@@ -58,7 +70,7 @@ export async function authorize(): Promise<Tokens> {
 
       // Only a callback carrying our state belongs to this authorization request.
       // Anything else (a forged or stale request) is refused and otherwise ignored.
-      if (!safeEqual(url.searchParams.get("state") ?? "", state)) {
+      if (!authStateMatches(url.searchParams.get("state"), state)) {
         res.writeHead(400, { "Content-Type": "text/plain" });
         res.end("Authorization failed: state mismatch. Please use the page this command opened.");
         return;

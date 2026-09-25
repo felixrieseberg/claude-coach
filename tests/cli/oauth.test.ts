@@ -32,6 +32,7 @@ vi.mock("../../src/lib/logging.js", () => ({
 }));
 
 import { authorize, AUTHORIZE_TIMEOUT_MS } from "../../src/strava/oauth.js";
+import type { Tokens } from "../../src/lib/config.js";
 
 /** GET a path on the local callback server, resolving with status and body. */
 function callback(query: string): Promise<{ status: number; body: string }> {
@@ -54,8 +55,17 @@ async function waitForBrowser(): Promise<URL> {
 
 describe("Strava OAuth authorize()", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
+  let pending: Promise<Tokens>[] = [];
+
+  /** authorize(), tracked so teardown can always shut its callback server down. */
+  function startAuthorize(): Promise<Tokens> {
+    const result = authorize();
+    pending.push(result);
+    return result;
+  }
 
   beforeEach(() => {
+    pending = [];
     opened.url = null;
     saved.tokens = null;
     fetchMock = vi.fn(async () =>
@@ -70,14 +80,19 @@ describe("Strava OAuth authorize()", () => {
   });
 
   afterEach(async () => {
-    vi.unstubAllGlobals();
     vi.useRealTimers();
+    // If a test failed mid-flow, end the outstanding authorization so its server
+    // releases port 8765 instead of breaking every following test.
+    const state = opened.url?.searchParams.get("state");
+    if (state) await callback(`error=teardown&state=${state}`).catch(() => {});
+    await Promise.allSettled(pending);
+    vi.unstubAllGlobals();
     // Let the callback server finish releasing the port before the next test listens.
     await new Promise((resolve) => setImmediate(resolve));
   });
 
   it("sends a random state and exchanges the code when the callback echoes it", async () => {
-    const result = authorize();
+    const result = startAuthorize();
     const authUrl = await waitForBrowser();
 
     const state = authUrl.searchParams.get("state");
@@ -99,13 +114,13 @@ describe("Strava OAuth authorize()", () => {
   });
 
   it("uses a fresh state for every authorization", async () => {
-    const first = authorize();
+    const first = startAuthorize();
     const firstState = (await waitForBrowser()).searchParams.get("state");
     await callback(`code=a&state=${firstState}`);
     await first;
 
     opened.url = null;
-    const second = authorize();
+    const second = startAuthorize();
     const secondState = (await waitForBrowser()).searchParams.get("state");
     await callback(`code=b&state=${secondState}`);
     await second;
@@ -114,7 +129,7 @@ describe("Strava OAuth authorize()", () => {
   });
 
   it("refuses a callback with a missing or forged state and keeps waiting for the real one", async () => {
-    const result = authorize();
+    const result = startAuthorize();
     const state = (await waitForBrowser()).searchParams.get("state");
 
     const missing = await callback("code=attacker-code");
@@ -137,7 +152,7 @@ describe("Strava OAuth authorize()", () => {
   });
 
   it("fails when Strava reports an error for our request", async () => {
-    const result = authorize();
+    const result = startAuthorize();
     const rejection = expect(result).rejects.toThrow("Authorization failed: access_denied");
     const state = (await waitForBrowser()).searchParams.get("state");
 
@@ -149,7 +164,7 @@ describe("Strava OAuth authorize()", () => {
 
   it("stops listening after the timeout", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    const result = authorize();
+    const result = startAuthorize();
     const rejection = expect(result).rejects.toThrow(/timed out/);
     await waitForBrowser();
 

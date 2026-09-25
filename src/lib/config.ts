@@ -16,6 +16,8 @@ export interface StravaConfig {
 export interface Config {
   strava: StravaConfig;
   sync_days: number;
+  /** `state` of an authorization URL printed by `auth`, awaiting its `--code` step. */
+  pending_auth_state?: string;
 }
 
 export interface Tokens {
@@ -31,16 +33,22 @@ export function ensureConfigDir(): void {
   }
   // The directory holds API credentials, tokens and activity data: keep it private
   // to the current user even if it was created earlier with a permissive umask.
-  chmodSync(CONFIG_DIR, 0o700);
+  // Best effort: the directory may be a mount or owned by someone else.
+  try {
+    chmodSync(CONFIG_DIR, 0o700);
+  } catch {
+    // Files inside are still written with 0600 below.
+  }
 }
 
-/**
- * Write a file that only the current user can read. The `mode` option is masked
- * by the process umask and ignored for existing files, so chmod afterwards too.
- */
+/** Write a file that only the current user can read (0600). */
 function writePrivateFile(path: string, data: string): void {
+  // `mode` only applies when the file is created, so tighten an existing
+  // (possibly world-readable) file before putting new secrets into it.
+  if (existsSync(path)) {
+    chmodSync(path, 0o600);
+  }
   writeFileSync(path, data, { mode: 0o600 });
-  chmodSync(path, 0o600);
 }
 
 export function getConfigPath(): string {
