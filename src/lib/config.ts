@@ -1,5 +1,5 @@
 import { homedir } from "os";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import * as readline from "readline";
 
@@ -16,6 +16,8 @@ export interface StravaConfig {
 export interface Config {
   strava: StravaConfig;
   sync_days: number;
+  /** `state` of an authorization URL printed by `auth`, awaiting its `--code` step. */
+  pending_auth_state?: string;
 }
 
 export interface Tokens {
@@ -27,8 +29,26 @@ export interface Tokens {
 
 export function ensureConfigDir(): void {
   if (!existsSync(CONFIG_DIR)) {
-    mkdirSync(CONFIG_DIR, { recursive: true });
+    mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
   }
+  // The directory holds API credentials, tokens and activity data: keep it private
+  // to the current user even if it was created earlier with a permissive umask.
+  // Best effort: the directory may be a mount or owned by someone else.
+  try {
+    chmodSync(CONFIG_DIR, 0o700);
+  } catch {
+    // Files inside are still written with 0600 below.
+  }
+}
+
+/** Write a file that only the current user can read (0600). */
+function writePrivateFile(path: string, data: string): void {
+  // `mode` only applies when the file is created, so tighten an existing
+  // (possibly world-readable) file before putting new secrets into it.
+  if (existsSync(path)) {
+    chmodSync(path, 0o600);
+  }
+  writeFileSync(path, data, { mode: 0o600 });
 }
 
 export function getConfigPath(): string {
@@ -61,7 +81,7 @@ export function loadConfig(): Config {
 
 export function saveConfig(config: Config): void {
   ensureConfigDir();
-  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+  writePrivateFile(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
 export function loadTokens(): Tokens {
@@ -74,7 +94,7 @@ export function loadTokens(): Tokens {
 
 export function saveTokens(tokens: Tokens): void {
   ensureConfigDir();
-  writeFileSync(TOKENS_FILE, JSON.stringify(tokens, null, 2));
+  writePrivateFile(TOKENS_FILE, JSON.stringify(tokens, null, 2));
 }
 
 export function tokensExpired(tokens: Tokens): boolean {

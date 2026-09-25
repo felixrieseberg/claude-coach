@@ -1,11 +1,11 @@
-import { execSync, spawnSync } from "child_process";
+import { execFileSync, spawnSync } from "child_process";
 import { getDbPath } from "../lib/config.js";
 
 // ============================================================================
 // SQLite Backend Abstraction
 // ============================================================================
 
-interface SqliteBackend {
+export interface SqliteBackend {
   query(sql: string): string;
   queryJson<T>(sql: string): T[];
   execute(sql: string): void;
@@ -54,35 +54,7 @@ async function detectBackend(): Promise<SqliteBackend> {
   // Fallback: Use sqlite3 CLI
   try {
     // Check if sqlite3 is available
-    execSync("sqlite3 --version", { stdio: "ignore" });
-
-    return {
-      query(sql: string): string {
-        const dbPath = getDbPath();
-        return execSync(`sqlite3 "${dbPath}" "${sql.replace(/"/g, '\\"')}"`, {
-          encoding: "utf-8",
-        });
-      },
-      queryJson<T>(sql: string): T[] {
-        const dbPath = getDbPath();
-        const result = execSync(`sqlite3 -json "${dbPath}" "${sql.replace(/"/g, '\\"')}"`, {
-          encoding: "utf-8",
-        });
-        if (!result.trim()) return [];
-        return JSON.parse(result);
-      },
-      execute(sql: string): void {
-        const dbPath = getDbPath();
-        const result = spawnSync("sqlite3", [dbPath], {
-          input: sql,
-          encoding: "utf-8",
-        });
-        if (result.error) throw result.error;
-        if (result.status !== 0) {
-          throw new Error(`SQLite error: ${result.stderr}`);
-        }
-      },
-    };
+    execFileSync("sqlite3", ["--version"], { stdio: "ignore" });
   } catch {
     throw new Error(
       "SQLite is not available. Please either:\n" +
@@ -90,6 +62,51 @@ async function detectBackend(): Promise<SqliteBackend> {
         "  2. Install sqlite3 CLI (brew install sqlite3 / apt install sqlite3)"
     );
   }
+
+  return createCliBackend(getDbPath());
+}
+
+/**
+ * Backend that shells out to the sqlite3 CLI. SQL is passed on stdin and the
+ * database path as an argv entry (never through a shell) so that quotes,
+ * backticks, `$()` and `;` in SQL or paths cannot escape into a shell command.
+ * The CLI runs in `-safe` mode where supported (sqlite 3.37+) so that
+ * dot-commands such as `.shell` or `.read` in the input are refused as well.
+ *
+ * Exported for tests.
+ */
+export function createCliBackend(dbPath: string): SqliteBackend {
+  const baseArgs =
+    spawnSync("sqlite3", ["-safe", ":memory:"], { input: "", stdio: "pipe" }).status === 0
+      ? ["-safe"]
+      : [];
+
+  function run(args: string[], sql: string): string {
+    const result = spawnSync("sqlite3", [...baseArgs, ...args, dbPath], {
+      input: sql,
+      encoding: "utf-8",
+      maxBuffer: 256 * 1024 * 1024,
+    });
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+      throw new Error(`SQLite error: ${result.stderr}`);
+    }
+    return result.stdout;
+  }
+
+  return {
+    query(sql: string): string {
+      return run([], sql);
+    },
+    queryJson<T>(sql: string): T[] {
+      const result = run(["-json"], sql);
+      if (!result.trim()) return [];
+      return JSON.parse(result);
+    },
+    execute(sql: string): void {
+      run([], sql);
+    },
+  };
 }
 
 /**
