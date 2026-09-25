@@ -58,10 +58,10 @@ Create a new release on GitHub with the skill zip attached:
 # Get the version from package.json
 VERSION=$(node -p "require('./package.json').version")
 
-# Create the release with the skill zip
+# Create the release with the skill zip and auto-generated notes
 gh release create "v$VERSION" \
   --title "v$VERSION" \
-  --notes "See [CHANGELOG.md](CHANGELOG.md) for details." \
+  --generate-notes \
   dist/coach-skill.zip
 ```
 
