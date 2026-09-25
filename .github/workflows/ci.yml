@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   check:
-    name: Typecheck, format, test, build viewer
+    name: Typecheck, format, test, build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,5 +42,11 @@ jobs:
       - name: Run tests
         run: npm run test:run
 
+      - name: Build package
+        run: npm run build:ts
+
       - name: Build viewer
         run: npm run build:viewer
+
+      - name: Package skill
+        run: npm run build:skill
