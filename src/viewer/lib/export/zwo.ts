@@ -94,7 +94,8 @@ function generateCooldown(step: WorkoutStep): string {
   const startPower = intensityToDecimal(step.intensity?.valueHigh ?? intensityValue);
   const endPower = intensityToDecimal(step.intensity?.valueLow ?? intensityValue * 0.5);
 
-  return `    <Cooldown Duration="${duration}" PowerLow="${endPower.toFixed(2)}" PowerHigh="${startPower.toFixed(2)}"/>`;
+  // Zwift ramps from PowerLow to PowerHigh (start -> end), so a cooldown starts at the higher value
+  return `    <Cooldown Duration="${duration}" PowerLow="${startPower.toFixed(2)}" PowerHigh="${endPower.toFixed(2)}"/>`;
 }
 
 /**
@@ -172,8 +173,8 @@ function generateSegmentsFromStructure(structure: StructuredWorkout): string[] {
   }
 
   // Main set
-  for (const item of structure.main) {
-    if ("repeats" in item) {
+  for (const item of structure.main ?? []) {
+    if (item.type === "interval_set" || "repeats" in item) {
       // Interval set
       segments.push(generateIntervalSet(item as IntervalSet));
     } else {
@@ -244,7 +245,7 @@ function generateSimpleWorkout(workout: Workout): string[] {
   );
 
   segments.push(
-    `    <Cooldown Duration="${cooldownMinutes * 60}" PowerLow="0.40" PowerHigh="0.60"/>`
+    `    <Cooldown Duration="${cooldownMinutes * 60}" PowerLow="0.60" PowerHigh="0.40"/>`
   );
 
   return segments;
