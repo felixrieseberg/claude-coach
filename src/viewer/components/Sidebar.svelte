@@ -107,9 +107,10 @@
     }, 3000);
   }
 
-  async function handleExportAllWorkouts(format: "zwo" | "fit") {
+  async function handleExportAllWorkouts(format: "zwo" | "fit" | "mrc" | "garmin-json") {
     showExportMenu = false;
-    exportStatus = { message: `Exporting ${format.toUpperCase()} files...`, isError: false };
+    const label = format === "garmin-json" ? "Garmin Connect JSON" : format.toUpperCase();
+    exportStatus = { message: `Exporting ${label} files...`, isError: false };
 
     const result = await exportAllWorkouts(plan, format, settings);
     if (result.errors.length === 0) {
@@ -247,7 +248,14 @@
             <span class="export-icon">G</span>
             <div>
               <div class="export-name">Garmin (.fit)</div>
-              <div class="export-desc">All workout types</div>
+              <div class="export-desc">Copy to GARMIN/NEWFILES on device</div>
+            </div>
+          </button>
+          <button class="export-option" onclick={() => handleExportAllWorkouts("garmin-json")}>
+            <span class="export-icon">J</span>
+            <div>
+              <div class="export-name">Garmin Connect (.json)</div>
+              <div class="export-desc">For Chrome extension import</div>
             </div>
           </button>
           <button class="export-option" onclick={() => handleExportAllWorkouts("mrc")}>

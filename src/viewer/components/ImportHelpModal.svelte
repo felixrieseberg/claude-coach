@@ -294,49 +294,33 @@
       <!-- Garmin Tab -->
       {#if activeTab === "garmin"}
         <div class="help-section">
-          <div class="file-type-badge">.fit files</div>
-          <p class="help-intro">
-            Garmin FIT files work with Garmin watches and bike computers. They include structured
-            workout targets that your device will guide you through.
-          </p>
+          <p class="help-intro">Two routes to get a workout onto your Garmin. Pick one.</p>
 
           <div class="app-guide">
-            <h4 class="app-name">
-              <span class="app-logo">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path
-                    d="M6.265 12.024a.289.289 0 0 0-.236-.146h-.182a.289.289 0 0 0-.234.146l-1.449 3.025c-.041.079.004.138.094.138h.335c.132 0 .193-.061.228-.134.037-.073.116-.234.13-.266.02-.045.083-.071.175-.071h1.559c.089 0 .148.016.175.071.018.035.098.179.136.256a.24.24 0 0 0 .234.142h.486c.089 0 .13-.069.098-.132-.034-.061-1.549-3.029-1.549-3.029zm-.914 2.224c-.089 0-.132-.067-.094-.148l.571-1.222c.039-.081.1-.081.136 0l.555 1.222c.037.081-.006.148-.096.148H5.351zm12.105-2.201v3.001c0 .083.073.138.163.138h.396c.089 0 .163-.057.163-.146v-2.998c0-.089-.059-.163-.148-.163h-.411c-.09-.001-.163.054-.163.168zm-6.631 1.88c-.051-.073-.022-.154.063-.181 0 0 .342-.102.506-.25.165-.146.246-.36.246-.636a1 1 0 0 0-.096-.457.787.787 0 0 0-.27-.303 1.276 1.276 0 0 0-.423-.171c-.165-.035-.386-.047-.386-.047a8.81 8.81 0 0 0-.325-.008H8.495a.164.164 0 0 0-.163.163v2.998c0 .089.073.146.163.146h.388c.089 0 .163-.057.163-.146v-1.193s.002 0 .002-.002l.738-.002c.089 0 .205.061.258.134l.766 1.077c.071.096.138.132.228.132h.508c.089 0 .104-.085.073-.128-.032-.038-.794-1.126-.794-1.126zm-.311-.61a1.57 1.57 0 0 1-.213.028 8.807 8.807 0 0 1-.325.006h-.763a.164.164 0 0 1-.163-.163v-.608c0-.089.073-.163.163-.163h.762c.089 0 .236.004.325.006 0 0 .114.004.213.028a.629.629 0 0 1 .24.098.358.358 0 0 1 .126.148.473.473 0 0 1 0 .374.352.352 0 0 1-.126.148.617.617 0 0 1-.239.098zm11.803-1.439c-.089 0-.163.059-.163.146v1.919c0 .089-.051.11-.114.047l-1.921-1.992a.376.376 0 0 0-.276-.118h-.362c-.114 0-.163.061-.163.122v3.068c0 .061.059.12.148.12h.362c.089 0 .152-.049.152-.132l.002-2.021c0-.089.051-.11.114-.045l2.004 2.082a.36.36 0 0 0 .279.116h.272a.164.164 0 0 0 .163-.163v-2.986a.164.164 0 0 0-.163-.163h-.334zm-7.835 1.87c-.043.079-.116.077-.159 0l-.939-1.724a.262.262 0 0 0-.236-.146h-.51a.164.164 0 0 0-.163.163v2.996c0 .089.059.15.163.15h.317c.089 0 .154-.057.154-.142 0-.041.002-2.179.004-2.179.004 0 1.173 2.177 1.173 2.177a.105.105 0 0 0 .189 0s1.179-2.173 1.181-2.173c.004 0 .002 2.11.002 2.173 0 .087.069.142.159.142h.364c.089 0 .163-.045.163-.163V12.04a.164.164 0 0 0-.163-.163h-.488a.265.265 0 0 0-.244.142l-.967 1.729zM0 13.529c0 1.616 1.653 1.697 1.984 1.697 1.098 0 1.561-.297 1.58-.309a.29.29 0 0 0 .152-.264v-1.116a.186.186 0 0 0-.187-.187H2.151c-.104 0-.171.083-.171.187v.116c0 .104.067.187.171.187h.797a.14.14 0 0 1 .14.14v.52c-.157.065-.874.274-1.451.136-.836-.199-.901-.89-.901-1.096 0-.173.053-1.043 1.079-1.13.831-.071 1.378.264 1.384.268.098.051.199.014.254-.089l.104-.209c.043-.085.028-.175-.077-.246-.006-.004-.59-.319-1.494-.319C.055 11.813 0 13.354 0 13.529z"
-                  />
-                </svg>
-              </span>
-              Garmin Connect (Web - Recommended)
-            </h4>
-            <ol class="step-list">
-              <li>
-                Go to <a href="https://connect.garmin.com" target="_blank" rel="noopener"
-                  >connect.garmin.com</a
-                > and sign in
-              </li>
-              <li>
-                Click <strong>"Training"</strong> in the left menu
-              </li>
-              <li>Select <strong>"Workouts"</strong></li>
-              <li>
-                Click <strong>"Import Workout"</strong> in the top right
-              </li>
-              <li>Select your .fit file and click <strong>"Import"</strong></li>
-              <li>
-                Review the workout and click <strong>"Save"</strong>
-              </li>
-              <li>
-                To send to your watch: click <strong>"Send to Device"</strong>
-                and select your Garmin device
-              </li>
-            </ol>
-            <div class="tip">
-              <strong>Tip:</strong> You can schedule workouts directly to specific dates in your Garmin
-              calendar.
-            </div>
+            <div class="file-type-badge">.json — recommended</div>
+            <h4 class="app-name">Use this if you want the workout in Garmin Connect</h4>
+            <p class="help-intro">
+              The workout lands in your Garmin Connect library (cloud). From there it auto-syncs to
+              every Garmin device on your account, you can drop it on the calendar, and you can edit
+              it later in Connect.
+            </p>
+            <p class="note">
+              <strong>Requires:</strong> a Garmin Connect account and Chrome (for the extension).
+            </p>
+          </div>
+
+          <div class="app-guide">
+            <div class="file-type-badge">.fit — quick standalone</div>
+            <h4 class="app-name">Use this if you just want it on the watch, now</h4>
+            <p class="help-intro">
+              The workout file is copied directly to the watch via USB. No Garmin Connect involved.
+              Good for offline situations, borrowed watches, or when the Chrome extension
+              misbehaves.
+            </p>
+            <p class="note">
+              <strong>Trade-offs:</strong> only loads on the one watch you plug in, no calendar planning,
+              can't be edited (re-export to update).
+            </p>
           </div>
 
           <div class="app-guide">
@@ -348,8 +332,51 @@
                   />
                 </svg>
               </span>
-              Garmin Connect (Mobile App)
+              Garmin Connect (.json via Chrome extension — Recommended)
             </h4>
+            <ol class="step-list">
+              <li>
+                Install the <a
+                  href="https://chromewebstore.google.com/detail/share-your-garmin-connect/kdpolhnlnkengkmfncjdbfdehglepmff"
+                  target="_blank"
+                  rel="noopener">"Share your Garmin Connect workout"</a
+                > Chrome extension
+              </li>
+              <li>
+                Export your workout from this viewer using <strong>"Garmin Connect (.json)"</strong>
+              </li>
+              <li>
+                Go to <a
+                  href="https://connect.garmin.com/app/workouts"
+                  target="_blank"
+                  rel="noopener">connect.garmin.com/app/workouts</a
+                > and sign in
+              </li>
+              <li>Use the extension's import button to upload the .json file</li>
+              <li>
+                The workout appears in your library — review and click <strong
+                  >"Send to Device"</strong
+                >
+              </li>
+            </ol>
+          </div>
+
+          <div class="app-guide">
+            <h4 class="app-name">
+              <span class="app-logo">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M6.265 12.024a.289.289 0 0 0-.236-.146h-.182a.289.289 0 0 0-.234.146l-1.449 3.025c-.041.079.004.138.094.138h.335c.132 0 .193-.061.228-.134.037-.073.116-.234.13-.266.02-.045.083-.071.175-.071h1.559c.089 0 .148.016.175.071.018.035.098.179.136.256a.24.24 0 0 0 .234.142h.486c.089 0 .13-.069.098-.132-.034-.061-1.549-3.029-1.549-3.029zm-.914 2.224c-.089 0-.132-.067-.094-.148l.571-1.222c.039-.081.1-.081.136 0l.555 1.222c.037.081-.006.148-.096.148H5.351zm12.105-2.201v3.001c0 .083.073.138.163.138h.396c.089 0 .163-.057.163-.146v-2.998c0-.089-.059-.163-.148-.163h-.411c-.09-.001-.163.054-.163.168zm-6.631 1.88c-.051-.073-.022-.154.063-.181 0 0 .342-.102.506-.25.165-.146.246-.36.246-.636a1 1 0 0 0-.096-.457.787.787 0 0 0-.27-.303 1.276 1.276 0 0 0-.423-.171c-.165-.035-.386-.047-.386-.047a8.81 8.81 0 0 0-.325-.008H8.495a.164.164 0 0 0-.163.163v2.998c0 .089.073.146.163.146h.388c.089 0 .163-.057.163-.146v-1.193s.002 0 .002-.002l.738-.002c.089 0 .205.061.258.134l.766 1.077c.071.096.138.132.228.132h.508c.089 0 .104-.085.073-.128-.032-.038-.794-1.126-.794-1.126zm-.311-.61a1.57 1.57 0 0 1-.213.028 8.807 8.807 0 0 1-.325.006h-.763a.164.164 0 0 1-.163-.163v-.608c0-.089.073-.163.163-.163h.762c.089 0 .236.004.325.006 0 0 .114.004.213.028a.629.629 0 0 1 .24.098.358.358 0 0 1 .126.148.473.473 0 0 1 0 .374.352.352 0 0 1-.126.148.617.617 0 0 1-.239.098zm11.803-1.439c-.089 0-.163.059-.163.146v1.919c0 .089-.051.11-.114.047l-1.921-1.992a.376.376 0 0 0-.276-.118h-.362c-.114 0-.163.061-.163.122v3.068c0 .061.059.12.148.12h.362c.089 0 .152-.049.152-.132l.002-2.021c0-.089.051-.11.114-.045l2.004 2.082a.36.36 0 0 0 .279.116h.272a.164.164 0 0 0 .163-.163v-2.986a.164.164 0 0 0-.163-.163h-.334zm-7.835 1.87c-.043.079-.116.077-.159 0l-.939-1.724a.262.262 0 0 0-.236-.146h-.51a.164.164 0 0 0-.163.163v2.996c0 .089.059.15.163.15h.317c.089 0 .154-.057.154-.142 0-.041.002-2.179.004-2.179.004 0 1.173 2.177 1.173 2.177a.105.105 0 0 0 .189 0s1.179-2.173 1.181-2.173c.004 0 .002 2.11.002 2.173 0 .087.069.142.159.142h.364c.089 0 .163-.045.163-.163V12.04a.164.164 0 0 0-.163-.163h-.488a.265.265 0 0 0-.244.142l-.967 1.729zM0 13.529c0 1.616 1.653 1.697 1.984 1.697 1.098 0 1.561-.297 1.58-.309a.29.29 0 0 0 .152-.264v-1.116a.186.186 0 0 0-.187-.187H2.151c-.104 0-.171.083-.171.187v.116c0 .104.067.187.171.187h.797a.14.14 0 0 1 .14.14v.52c-.157.065-.874.274-1.451.136-.836-.199-.901-.89-.901-1.096 0-.173.053-1.043 1.079-1.13.831-.071 1.378.264 1.384.268.098.051.199.014.254-.089l.104-.209c.043-.085.028-.175-.077-.246-.006-.004-.59-.319-1.494-.319C.055 11.813 0 13.354 0 13.529z"
+                  />
+                </svg>
+              </span>
+              Garmin Connect (Mobile App) — may not be available
+            </h4>
+            <p class="help-intro">
+              Some versions of the mobile app expose a workout import button. If yours does, the
+              flow is below. If you don't see an "Import" option, fall back to .json + Chrome
+              extension or USB transfer.
+            </p>
             <ol class="step-list">
               <li>Open the <strong>Garmin Connect</strong> app</li>
               <li>
@@ -357,7 +384,7 @@
                 <strong>"Training & Planning"</strong>
               </li>
               <li>Tap <strong>"Workouts"</strong></li>
-              <li>Tap the <strong>+</strong> button → <strong>"Import"</strong></li>
+              <li>Tap the <strong>+</strong> button → <strong>"Import"</strong> (if present)</li>
               <li>Browse to select your .fit file</li>
               <li>
                 Tap <strong>"Send to Device"</strong> to sync to your watch
