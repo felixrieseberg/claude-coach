@@ -5,8 +5,8 @@ Thanks for your interest in Claude Coach! This is a small, independent side proj
 ## How issues and pull requests are triaged
 
 - New issues and pull requests are looked at on a best-effort basis, usually within a week or two. If something has been sitting longer than that without a response, a friendly bump on the thread is welcome.
-- Issues get labeled by **type** (`bug`, `enhancement`, `question`, `documentation`) and by **area** (for example `exports` for workout export formats like `.zwo`, `.fit`, or `.mrc`, and `strava` for anything about syncing activities).
-- `needs-info` means the issue is waiting on more detail from the person who opened it. Issues that stay in `needs-info` for a month or so without a reply may be closed; they can always be reopened.
+- Issues get one of GitHub's standard labels: `bug`, `enhancement`, `question`, or `documentation` for the type, and `duplicate`, `invalid`, or `wontfix` when an issue is being closed without a change.
+- If a maintainer has asked for more detail and the issue goes about a month without a reply, it may be closed; it can always be reopened once the information is there.
 - `good first issue` and `help wanted` mark things where a pull request would be especially welcome.
 - Not every feature request will be accepted. The goal is to keep the skill small and focused on generating and exporting training plans, so larger integrations may be declined or left open for discussion.
 
