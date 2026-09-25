@@ -36,6 +36,15 @@ describe.skipIf(!hasSqliteCli)("sqlite3 CLI backend", () => {
     expect(readdirSync(dir)).toEqual(["coach.db"]);
   });
 
+  // sqlite3 3.37+ supports -safe; older CLIs cannot block dot-commands.
+  const safeMode = spawnSync("sqlite3", ["-safe", ":memory:"], { input: "" }).status === 0;
+  it.skipIf(!safeMode)("refuses dot-commands such as .shell embedded in the SQL", () => {
+    const marker = join(dir, "pwned");
+    expect(() => db.query(`SELECT 1;\n.shell touch '${marker}'\n`)).toThrow(/safe mode/);
+    expect(() => db.execute(`.output '${marker}'\nSELECT 1;\n`)).toThrow(/SQLite error/);
+    expect(existsSync(marker)).toBe(false);
+  });
+
   it("returns an empty result for queries with no rows", () => {
     expect(db.query("SELECT * FROM notes;")).toBe("");
     expect(db.queryJson("SELECT * FROM notes;")).toEqual([]);

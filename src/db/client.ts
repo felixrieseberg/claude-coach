@@ -70,14 +70,22 @@ async function detectBackend(): Promise<SqliteBackend> {
  * Backend that shells out to the sqlite3 CLI. SQL is passed on stdin and the
  * database path as an argv entry (never through a shell) so that quotes,
  * backticks, `$()` and `;` in SQL or paths cannot escape into a shell command.
+ * The CLI runs in `-safe` mode where supported (sqlite 3.37+) so that
+ * dot-commands such as `.shell` or `.read` in the input are refused as well.
  *
  * Exported for tests.
  */
 export function createCliBackend(dbPath: string): SqliteBackend {
+  const baseArgs =
+    spawnSync("sqlite3", ["-safe", ":memory:"], { input: "", stdio: "pipe" }).status === 0
+      ? ["-safe"]
+      : [];
+
   function run(args: string[], sql: string): string {
-    const result = spawnSync("sqlite3", [...args, dbPath], {
+    const result = spawnSync("sqlite3", [...baseArgs, ...args, dbPath], {
       input: sql,
       encoding: "utf-8",
+      maxBuffer: 256 * 1024 * 1024,
     });
     if (result.error) throw result.error;
     if (result.status !== 0) {
