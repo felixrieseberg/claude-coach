@@ -1,5 +1,5 @@
 import { homedir } from "os";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 import * as readline from "readline";
 
@@ -27,8 +27,20 @@ export interface Tokens {
 
 export function ensureConfigDir(): void {
   if (!existsSync(CONFIG_DIR)) {
-    mkdirSync(CONFIG_DIR, { recursive: true });
+    mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
   }
+  // The directory holds API credentials, tokens and activity data: keep it private
+  // to the current user even if it was created earlier with a permissive umask.
+  chmodSync(CONFIG_DIR, 0o700);
+}
+
+/**
+ * Write a file that only the current user can read. The `mode` option is masked
+ * by the process umask and ignored for existing files, so chmod afterwards too.
+ */
+function writePrivateFile(path: string, data: string): void {
+  writeFileSync(path, data, { mode: 0o600 });
+  chmodSync(path, 0o600);
 }
 
 export function getConfigPath(): string {
@@ -61,7 +73,7 @@ export function loadConfig(): Config {
 
 export function saveConfig(config: Config): void {
   ensureConfigDir();
-  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
+  writePrivateFile(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
 export function loadTokens(): Tokens {
@@ -74,7 +86,7 @@ export function loadTokens(): Tokens {
 
 export function saveTokens(tokens: Tokens): void {
   ensureConfigDir();
-  writeFileSync(TOKENS_FILE, JSON.stringify(tokens, null, 2));
+  writePrivateFile(TOKENS_FILE, JSON.stringify(tokens, null, 2));
 }
 
 export function tokensExpired(tokens: Tokens): boolean {
