@@ -86,6 +86,10 @@ In the next step, Claude will ask you about yourself, the event you're training 
 
 Claude will use this information to create a plan tailored to your current fitness level. The more detail you provide, the better your plan will be.
 
+# Contributing
+
+Issues and pull requests are welcome. See [CONTRIBUTING.md](https://github.com/felixrieseberg/claude-coach/blob/main/CONTRIBUTING.md) for how they're triaged and what to include.
+
 # About
 
 Claude Coach is an independent, open-source project and is not made by, endorsed by, or affiliated with Anthropic, PBC. "Claude" is a trademark of Anthropic. This tool is a skill/plugin that works with Claude products but is developed and maintained independently. License: MIT.
