@@ -42,17 +42,17 @@
     "undici": "^7.30.0"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.2.1",
-    "@types/node": "^22.10.2",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@types/node": "^22.20.4",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.4.2",
-    "prettier-plugin-svelte": "^3.4.1",
-    "svelte": "^5.43.12",
-    "tsx": "^4.19.2",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-svelte": "^3.5.2",
+    "svelte": "^5.57.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.2",
-    "vite": "^7.2.6",
-    "vite-plugin-singlefile": "^2.3.0",
-    "vitest": "^3.2.4"
+    "vite": "^7.3.6",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^3.2.7"
   }
 }
