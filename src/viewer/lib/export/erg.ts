@@ -50,10 +50,22 @@ function generateDataPoints(structure: StructuredWorkout): [number, number][] {
     // Add start point
     points.push([currentMinute, percent]);
 
-    // For ramps, add intermediate points
-    if (step.intensity?.valueLow !== undefined && step.intensity?.valueHigh !== undefined) {
-      const startPercent = intensityToPercent(step.intensity.valueLow);
-      const endPercent = intensityToPercent(step.intensity.valueHigh);
+    // Warmup/cooldown steps with a range are ramps; on other steps the range is a
+    // target band around `value`, so they stay flat.
+    const isRamp = step.type === "warmup" || step.type === "cooldown";
+    if (
+      isRamp &&
+      step.intensity?.valueLow !== undefined &&
+      step.intensity?.valueHigh !== undefined
+    ) {
+      // Warmups ramp up (low -> high); cooldowns ramp down (high -> low)
+      const isCooldown = step.type === "cooldown";
+      const startPercent = intensityToPercent(
+        isCooldown ? step.intensity.valueHigh : step.intensity.valueLow
+      );
+      const endPercent = intensityToPercent(
+        isCooldown ? step.intensity.valueLow : step.intensity.valueHigh
+      );
       points[points.length - 1] = [currentMinute, startPercent];
       currentMinute += durationMinutes;
       points.push([currentMinute, endPercent]);
@@ -95,7 +107,7 @@ function generateDataPoints(structure: StructuredWorkout): [number, number][] {
 
   // Process main set
   for (const item of structure.main ?? []) {
-    if ("repeats" in item) {
+    if (item.type === "interval_set" || "repeats" in item) {
       const intervalSet = item as IntervalSet;
       for (let i = 0; i < (intervalSet.repeats ?? 1); i++) {
         for (const step of intervalSet.steps ?? []) {

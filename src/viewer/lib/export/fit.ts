@@ -61,15 +61,11 @@ function getFitSport(sport: Sport): string {
 function getFitSubSport(sport: Sport): string {
   switch (sport) {
     case "swim":
-      return "lap_swimming";
+      return "lapSwimming";
     case "bike":
       return "road";
-    case "run":
-      return "road";
     case "strength":
-      return "strength_training";
-    case "brick":
-      return "triathlon";
+      return "strengthTraining";
     default:
       return "generic";
   }
@@ -136,9 +132,25 @@ function getDurationType(unit: string): string {
 }
 
 /**
+ * FIT string fields hold at most 255 bytes including the terminator.
+ * Trim long names/notes so one verbose coaching cue can't abort the export.
+ */
+function fitString(value: string | undefined, maxBytes = 200): string {
+  let str = value ?? "";
+  const encoder = new TextEncoder();
+  while (encoder.encode(str).length > maxBytes) {
+    str = str.slice(0, -Math.max(1, Math.ceil(str.length / 10)));
+  }
+  return str;
+}
+
+/**
  * Generate workout steps from structured workout
  */
-function generateStepsFromStructure(structure: StructuredWorkout): {
+function generateStepsFromStructure(
+  structure: StructuredWorkout,
+  lthr: number | undefined
+): {
   steps: any[];
   totalSteps: number;
 } {
@@ -146,7 +158,7 @@ function generateStepsFromStructure(structure: StructuredWorkout): {
   let stepIndex = 0;
 
   // Helper to add a step
-  const addStep = (step: WorkoutStep, isPartOfRepeat = false) => {
+  const addStep = (step: WorkoutStep) => {
     const durationType = getDurationType(step.duration?.unit ?? "minutes");
     const durationValue = getDurationValue(
       step.duration?.value ?? 0,
@@ -155,11 +167,11 @@ function generateStepsFromStructure(structure: StructuredWorkout): {
 
     const fitStep: any = {
       messageIndex: stepIndex,
-      workoutStepName: step.name || "",
+      wktStepName: fitString(step.name),
       intensity: getStepIntensity(step.type),
       durationType: durationType,
       durationValue: durationValue,
-      notes: step.notes || "",
+      notes: fitString(step.notes),
     };
 
     // Add target based on intensity unit
@@ -172,16 +184,31 @@ function generateStepsFromStructure(structure: StructuredWorkout): {
           fitStep.customTargetValueLow = step.intensity.valueLow ?? intensityValue - 5;
           fitStep.customTargetValueHigh = step.intensity.valueHigh ?? intensityValue + 5;
           break;
-        case "percent_lthr":
-        case "hr_zone":
-          fitStep.targetType = "heart_rate";
-          fitStep.targetValue = 0;
-          // HR zone values need to be actual BPM if available
-          if (step.intensity.valueLow !== undefined && step.intensity.valueHigh !== undefined) {
-            fitStep.customTargetValueLow = step.intensity.valueLow;
-            fitStep.customTargetValueHigh = step.intensity.valueHigh;
+        case "percent_lthr": {
+          // Convert % of LTHR to a bpm range. FIT custom HR targets are bpm + 100.
+          // Efforts above ~105% LTHR are short reps where an HR target is meaningless
+          // (HR lags and would sit above max), so those get an open target.
+          const low = step.intensity.valueLow ?? intensityValue - 3;
+          const high = step.intensity.valueHigh ?? intensityValue + 3;
+          if (lthr && high <= 106) {
+            fitStep.targetType = "heartRate";
+            fitStep.targetValue = 0;
+            fitStep.customTargetValueLow = Math.round((lthr * low) / 100) + 100;
+            fitStep.customTargetValueHigh = Math.round((lthr * high) / 100) + 100;
           } else {
-            // Use zone as target value (1-5)
+            fitStep.targetType = "open";
+          }
+          break;
+        }
+        case "hr_zone":
+          fitStep.targetType = "heartRate";
+          if (step.intensity.valueLow !== undefined && step.intensity.valueHigh !== undefined) {
+            // Explicit bpm bounds (custom HR targets are bpm + 100)
+            fitStep.targetValue = 0;
+            fitStep.customTargetValueLow = step.intensity.valueLow + 100;
+            fitStep.customTargetValueHigh = step.intensity.valueHigh + 100;
+          } else {
+            // Zone number (1-5) is a valid FIT HR target value
             fitStep.targetValue = intensityValue;
           }
           break;
@@ -196,42 +223,40 @@ function generateStepsFromStructure(structure: StructuredWorkout): {
       fitStep.targetType = "open";
     }
 
-    // Add cadence target if present
+    // Add cadence as a secondary target if present
     if (step.cadence) {
-      fitStep.customTargetCadenceLow = step.cadence.low ?? 80;
-      fitStep.customTargetCadenceHigh = step.cadence.high ?? 100;
+      fitStep.secondaryTargetType = "cadence";
+      fitStep.secondaryTargetValue = 0;
+      fitStep.secondaryCustomTargetValueLow = step.cadence.low ?? 80;
+      fitStep.secondaryCustomTargetValueHigh = step.cadence.high ?? 100;
     }
 
     steps.push(fitStep);
     stepIndex++;
-    return stepIndex - 1;
   };
 
   // Helper to add interval set
   const addIntervalSet = (intervalSet: IntervalSet) => {
-    // For FIT, we need to add a repeat step that references the child steps
-    const repeatStepIndex = stepIndex;
-    stepIndex++; // Reserve index for repeat step
+    // FIT repeats are expressed as the child steps followed by a "repeat" step
+    // that points back at the first child (durationValue) and carries the
+    // number of repetitions (targetValue).
+    const childSteps = intervalSet.steps ?? [];
+    if (childSteps.length === 0) return;
 
-    // Add the child steps
-    const childStepIndices: number[] = [];
-    for (const childStep of intervalSet.steps) {
-      childStepIndices.push(addStep(childStep, true));
+    const firstChildIndex = stepIndex;
+    for (const childStep of childSteps) {
+      addStep(childStep);
     }
 
-    // Create the repeat step
-    const repeatStep: any = {
-      messageIndex: repeatStepIndex,
-      workoutStepName: intervalSet.name || "Intervals",
-      durationType: "repeat_until_steps_cmplt",
-      durationValue: intervalSet.repeats,
+    steps.push({
+      messageIndex: stepIndex,
+      wktStepName: fitString(intervalSet.name) || "Intervals",
+      durationType: "repeatUntilStepsCmplt",
+      durationValue: firstChildIndex,
       targetType: "open",
-      intensity: "interval",
-    };
-
-    // Insert repeat step at correct position
-    steps.splice(repeatStepIndex, 0, repeatStep);
-    stepIndex++; // Adjust for inserted repeat step
+      targetValue: intervalSet.repeats ?? 1,
+    });
+    stepIndex++;
   };
 
   // Process warmup
@@ -242,8 +267,8 @@ function generateStepsFromStructure(structure: StructuredWorkout): {
   }
 
   // Process main set
-  for (const item of structure.main) {
-    if ("repeats" in item) {
+  for (const item of structure.main ?? []) {
+    if (item.type === "interval_set" || "repeats" in item) {
       addIntervalSet(item as IntervalSet);
     } else {
       addStep(item as WorkoutStep);
@@ -271,7 +296,7 @@ function generateSimpleSteps(workout: Workout): { steps: any[]; totalSteps: numb
   const warmupMinutes = Math.min(15, Math.max(5, Math.round(totalMinutes * 0.1)));
   steps.push({
     messageIndex: 0,
-    workoutStepName: "Warm Up",
+    wktStepName: "Warm Up",
     intensity: "warmup",
     durationType: "time",
     durationValue: warmupMinutes * 60 * 1000,
@@ -289,7 +314,7 @@ function generateSimpleSteps(workout: Workout): { steps: any[]; totalSteps: numb
 
   steps.push({
     messageIndex: 1,
-    workoutStepName: "Main Set",
+    wktStepName: "Main Set",
     intensity: mainIntensity,
     durationType: "time",
     durationValue: mainMinutes * 60 * 1000,
@@ -300,7 +325,7 @@ function generateSimpleSteps(workout: Workout): { steps: any[]; totalSteps: numb
   // Cooldown (10% of total, 5-10 min)
   steps.push({
     messageIndex: 2,
-    workoutStepName: "Cool Down",
+    wktStepName: "Cool Down",
     intensity: "cooldown",
     durationType: "time",
     durationValue: cooldownMinutes * 60 * 1000,
@@ -313,7 +338,7 @@ function generateSimpleSteps(workout: Workout): { steps: any[]; totalSteps: numb
 /**
  * Generate a complete FIT workout file
  */
-export async function generateFit(workout: Workout, _settings: Settings): Promise<Uint8Array> {
+export async function generateFit(workout: Workout, settings: Settings): Promise<Uint8Array> {
   if (!isFitSupported(workout.sport)) {
     throw new Error(`FIT export not supported for ${workout.sport} workouts`);
   }
@@ -330,13 +355,14 @@ export async function generateFit(workout: Workout, _settings: Settings): Promis
   });
 
   // Generate steps
+  const lthr = workout.sport === "bike" ? settings?.bike?.lthr : settings?.run?.lthr;
   const { steps, totalSteps } = workout.structure
-    ? generateStepsFromStructure(workout.structure)
+    ? generateStepsFromStructure(workout.structure, lthr)
     : generateSimpleSteps(workout);
 
   // Workout message
   encoder.onMesg(Profile.MesgNum.WORKOUT, {
-    workoutName: workout.name,
+    wktName: fitString(workout.name),
     sport: getFitSport(workout.sport),
     subSport: getFitSubSport(workout.sport),
     numValidSteps: totalSteps,

@@ -289,6 +289,30 @@ describe("ERG/MRC Export", () => {
       expect(dataLines[0]).toMatch(/^0\.00\t40$/);
       expect(dataLines[1]).toMatch(/^10\.00\t70$/);
     });
+
+    it("should ramp cooldown steps down from valueHigh to valueLow", () => {
+      const workout = createWorkout({
+        structure: {
+          main: [],
+          cooldown: [
+            {
+              type: "cooldown",
+              duration: { unit: "minutes", value: 10 },
+              intensity: { unit: "percent_ftp", value: 55, valueLow: 40, valueHigh: 55 },
+            },
+          ],
+        },
+      });
+
+      const mrc = generateMrc(workout, mockSettings);
+      const lines = mrc.split("\n");
+
+      const dataStartIdx = lines.findIndex((l) => l === "[COURSE DATA]");
+      const dataLines = lines.slice(dataStartIdx + 1, dataStartIdx + 3);
+
+      expect(dataLines[0]).toMatch(/^0\.00\t55$/);
+      expect(dataLines[1]).toMatch(/^10\.00\t40$/);
+    });
   });
 
   describe("generateMrc - error handling", () => {
