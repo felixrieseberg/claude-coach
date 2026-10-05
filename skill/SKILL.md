@@ -494,6 +494,8 @@ Here's the structure:
 }
 ```
 
+**Durations must add up:** `durationMinutes` is the length of the whole session, warm-up and cool-down included. It is the number on the calendar card, in the workout detail and in the sidebar's hour totals, so it is what the athlete plans their day around. `humanReadable` describes that same session, so its parts must add up to `durationMinutes`: "10 min warm-up, 4x (3 min hard / 2 min easy), 10 min cool-down" is a 40-minute workout, not 30 and not 45. For parts given as a distance (a 1 mile warm-up, 5x1000m, a 2500m swim), count a realistic time at the prescribed pace. When you change a workout's length (scaling a week to its target hours, trimming a taper), change `durationMinutes` and `humanReadable` together, and keep the week's `targetHours` and `summary` in line with the new total.
+
 ### Step 2: Render to HTML
 
 After writing the JSON file, render it to an interactive HTML viewer:
@@ -544,3 +546,4 @@ After both files are created, tell the user:
 - **Explain the "why"** - Athletes trust and follow plans they understand
 - **Be conservative with manual data** - When working without Strava, err on the side of caution with volume and intensity
 - **Recommend field tests** - For manual data athletes, include zone validation workouts in the first 1-2 weeks
+- **Durations must add up** - The parts of `humanReadable` add up to `durationMinutes`, warm-up and cool-down included (count distance-based parts at the prescribed pace); change both together
