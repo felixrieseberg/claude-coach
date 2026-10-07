@@ -14,10 +14,11 @@ import type { Settings } from "../../stores/settings.js";
 import { generateZwo, isZwoSupported } from "./zwo.js";
 import { generateFit, isFitSupported } from "./fit.js";
 import { generateMrc, isErgSupported } from "./erg.js";
+import { generateGarminJson, isGarminJsonSupported } from "./garmin-json.js";
 import { generateIcs } from "./ics.js";
 import JSZip from "jszip";
 
-export type ExportFormat = "zwo" | "fit" | "mrc" | "ics";
+export type ExportFormat = "zwo" | "fit" | "mrc" | "garmin-json" | "ics";
 
 export interface ExportResult {
   success: boolean;
@@ -76,6 +77,10 @@ export function getAvailableFormats(sport: Sport): ExportFormat[] {
     formats.push("mrc");
   }
 
+  if (isGarminJsonSupported(sport)) {
+    formats.push("garmin-json");
+  }
+
   return formats;
 }
 
@@ -85,7 +90,8 @@ export function getAvailableFormats(sport: Sport): ExportFormat[] {
 export async function exportWorkout(
   workout: Workout,
   format: ExportFormat,
-  settings: Settings
+  settings: Settings,
+  plan?: TrainingPlan | null
 ): Promise<ExportResult> {
   const safeName = sanitizeFilename(workout.name);
 
@@ -133,6 +139,20 @@ export async function exportWorkout(
         return { success: true, filename };
       }
 
+      case "garmin-json": {
+        if (!isGarminJsonSupported(workout.sport)) {
+          return {
+            success: false,
+            filename: "",
+            error: `Garmin Connect JSON export not supported for ${workout.sport} workouts`,
+          };
+        }
+        const jsonContent = generateGarminJson(workout, settings, plan);
+        const filename = `${safeName}.json`;
+        downloadFile(jsonContent, filename, "application/json");
+        return { success: true, filename };
+      }
+
       default:
         return {
           success: false,
@@ -173,8 +193,9 @@ export function exportPlanToCalendar(plan: TrainingPlan): ExportResult {
  */
 async function generateWorkoutContent(
   workout: Workout,
-  format: "zwo" | "fit" | "mrc",
-  settings: Settings
+  format: "zwo" | "fit" | "mrc" | "garmin-json",
+  settings: Settings,
+  plan?: TrainingPlan | null
 ): Promise<{ content: string | Uint8Array; filename: string } | null> {
   const safeName = sanitizeFilename(workout.name);
 
@@ -195,6 +216,11 @@ async function generateWorkoutContent(
         const content = generateMrc(workout, settings);
         return { content, filename: `${safeName}.mrc` };
       }
+      case "garmin-json": {
+        if (!isGarminJsonSupported(workout.sport)) return null;
+        const content = generateGarminJson(workout, settings, plan);
+        return { content, filename: `${safeName}.json` };
+      }
       default:
         return null;
     }
@@ -205,11 +231,11 @@ async function generateWorkoutContent(
 
 /**
  * Export all workouts in the plan to a single ZIP file
- * Contains ZWO/FIT/MRC files based on the selected format
+ * Contains ZWO/FIT/MRC/JSON files based on the selected format
  */
 export async function exportAllWorkouts(
   plan: TrainingPlan,
-  format: "zwo" | "fit" | "mrc",
+  format: "zwo" | "fit" | "mrc" | "garmin-json",
   settings: Settings
 ): Promise<{ exported: number; skipped: number; errors: string[] }> {
   const errors: string[] = [];
@@ -240,9 +266,13 @@ export async function exportAllWorkouts(
           skipped++;
           continue;
         }
+        if (format === "garmin-json" && !isGarminJsonSupported(workout.sport)) {
+          skipped++;
+          continue;
+        }
 
         try {
-          const result = await generateWorkoutContent(workout, format, settings);
+          const result = await generateWorkoutContent(workout, format, settings, plan);
           if (result) {
             zip.file(result.filename, result.content);
             exported++;
@@ -273,3 +303,4 @@ export async function exportAllWorkouts(
 export { isZwoSupported } from "./zwo.js";
 export { isFitSupported, isFitSdkAvailable } from "./fit.js";
 export { isErgSupported } from "./erg.js";
+export { isGarminJsonSupported } from "./garmin-json.js";

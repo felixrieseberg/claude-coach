@@ -240,6 +240,7 @@
     mode={modalState.mode}
     isCompleted={modalState.mode === "view" && !!completed[modalState.workout.id]}
     {settings}
+    plan={planData}
     onClose={handleCloseModal}
     onToggleComplete={handleToggleComplete}
     onSave={handleWorkoutSave}

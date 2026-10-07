@@ -1,6 +1,12 @@
 <script lang="ts">
   import { untrack } from "svelte";
-  import type { Workout, TrainingDay, Sport, WorkoutType } from "../../schema/training-plan.js";
+  import type {
+    Workout,
+    TrainingDay,
+    Sport,
+    WorkoutType,
+    TrainingPlan,
+  } from "../../schema/training-plan.js";
   import type { Settings } from "../stores/settings.js";
   import { formatDuration, formatDistance, formatDate, getZoneInfo } from "../lib/utils.js";
   import {
@@ -9,6 +15,7 @@
     isZwoSupported,
     isFitSupported,
     isErgSupported,
+    isGarminJsonSupported,
     type ExportFormat,
   } from "../lib/export/index.js";
 
@@ -20,6 +27,7 @@
     settings: Settings;
     mode?: Mode;
     isCompleted?: boolean;
+    plan?: TrainingPlan | null;
     onClose: () => void;
     onToggleComplete: (workoutId: string) => void;
     onSave: (workout: Partial<Workout>) => void;
@@ -33,6 +41,7 @@
     settings,
     mode = "view",
     isCompleted = false,
+    plan = null,
     onClose,
     onToggleComplete,
     onSave,
@@ -141,7 +150,7 @@
     showExportMenu = false;
     exportStatus = { message: "Exporting...", isError: false };
 
-    const result = await exportWorkout(workout, format, settings);
+    const result = await exportWorkout(workout, format, settings, plan);
 
     if (result.success) {
       exportStatus = { message: `Downloaded ${result.filename}`, isError: false };
@@ -387,7 +396,18 @@
                       <span class="export-icon">G</span>
                       <div class="export-info">
                         <div class="export-name">Garmin (.fit)</div>
-                        <div class="export-desc">For Garmin Connect</div>
+                        <div class="export-desc">For Garmin device (copy to GARMIN/NEWFILES)</div>
+                      </div>
+                    </button>
+                  {/if}
+                  {#if isGarminJsonSupported(displayWorkout.sport)}
+                    <button class="export-option" onclick={() => handleExport("garmin-json")}>
+                      <span class="export-icon">J</span>
+                      <div class="export-info">
+                        <div class="export-name">Garmin Connect (.json)</div>
+                        <div class="export-desc">
+                          For "Share your Garmin Connect workout" Chrome extension
+                        </div>
                       </div>
                     </button>
                   {/if}
@@ -911,6 +931,7 @@
   }
 
   .export-icon {
+    flex-shrink: 0;
     width: 32px;
     height: 32px;
     border-radius: 6px;
